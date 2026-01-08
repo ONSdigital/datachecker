@@ -16,7 +16,7 @@ nav:
     - schema loader: api_reference/schema_loader.md
     - validator exporter: api_reference/validator_exporter.md
 theme:
-  logo: ./_static/af-logo.png
+  logo: images/af.png
   name: material
   palette:
     # Palette toggle for light mode
