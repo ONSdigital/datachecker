@@ -16,7 +16,7 @@ nav:
     - schema loader: api_reference/schema_loader.md
     - validator exporter: api_reference/validator_exporter.md
 theme:
-  logo: "_static/af-logo.png"
+  logo: _static/af-logo.png
   name: material
   palette:
     # Palette toggle for light mode
@@ -85,5 +85,6 @@ plugins:
 
 extra_css:
   - _static/mkdocs_custom.css
+
 
 copyright: Copyright &copy; Office for National Statistics 2026
