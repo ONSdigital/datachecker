@@ -55,6 +55,7 @@ dev = [
     "python-dotenv",
     "toml",
     "bump_my_version",
+    "pre-commit",
     "mkdocs",
     "mkdocs-material",
     "mkdocstrings[python]",

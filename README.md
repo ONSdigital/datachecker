@@ -25,7 +25,7 @@ Whilst in the root folder, in a terminal, you can install the package and its
 Python dependencies using:
 
 ```shell
-pip install pip install git+https://gitlab-app-l-01/ASAP/py-onsdatavalidator.git
+pip install pip install git+https://github.com/ONSdigital/datachecker.git
 ```
 
 ## Pre-Defined Checks

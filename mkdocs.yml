@@ -1,5 +1,5 @@
 site_name: datachecker
-repo_url: https://gitlab-app-l-01/ASAP/py-onsdatavalidator/
+repo_url: https://github.com/ONSdigital/datachecker.git
 repo_name: datachecker
 site_description: A Python package for validating datasets against predefined checks.
 nav:
