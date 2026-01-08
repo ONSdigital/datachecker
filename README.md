@@ -15,7 +15,7 @@ a virtual environment.
 
 ## Requirements
 
-- Python 3.9+ installed
+- Python 3.10+ installed
 
 Contributors have some additional requirements - please see our [contributing guidance][contributing].
 
@@ -25,7 +25,7 @@ Whilst in the root folder, in a terminal, you can install the package and its
 Python dependencies using:
 
 ```shell
-pip install pip install git+https://github.com/ONSdigital/datachecker.git
+pip install git+https://github.com/ONSdigital/datachecker.git
 ```
 
 ## Pre-Defined Checks
@@ -91,7 +91,7 @@ package.
 
 ## Creating the documentation locally
 
-first pip instal the developer requirements, then run mkdocs serve to host the documentation on your local environment
+first pip instal the developer requirements, then run `mkdocs serve` to host the documentation on your local environment
 
 ```shell
 pip install -e .[docs]

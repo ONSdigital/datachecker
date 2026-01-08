@@ -1,5 +1,5 @@
 site_name: datachecker
-repo_url: https://github.com/ONSdigital/datachecker.git
+repo_url: https://github.com/ONSdigital/datachecker
 repo_name: datachecker
 site_description: A Python package for validating datasets against predefined checks.
 nav:
@@ -16,7 +16,7 @@ nav:
     - schema loader: api_reference/schema_loader.md
     - validator exporter: api_reference/validator_exporter.md
 theme:
-  logo: _static/af-logo.png
+  logo: ./_static/af-logo.png
   name: material
   palette:
     # Palette toggle for light mode
