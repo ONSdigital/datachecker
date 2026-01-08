@@ -3,7 +3,7 @@
 ## Quickstart 
 
 ```Bash
-pip install datachecker
+pip install git+https://github.com/ONSdigital/datachecker.git
 ```
 create a schema for your dataset (either in python or read in the supported formats).
 Load in your dataset.
