@@ -94,7 +94,7 @@ package.
 first pip instal the developer requirements, then run mkdocs serve to host the documentation on your local environment
 
 ```shell
-pip install -e .[dev]
+pip install -e .[docs]
 mkdocs serve
 ```
 
