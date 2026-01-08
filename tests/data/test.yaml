@@ -1,0 +1,8 @@
+
+columns:
+  a:
+    type: double
+    optional: true
+  b:
+    type: character
+    optional: true

@@ -1,0 +1,101 @@
+[project]
+name = "datachecker"
+description = "A placeholder description for your python project"
+version = "0.0.1"
+authors = [
+    {"name" = "ONS"}
+]
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+    "pyyaml",
+    "pandas",
+    "tomli",
+    "jinja2",
+    "pandera[pandas]>=0.26.1",
+    "polars", 
+    "pyarrow",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "datachecker",
+    "datachecker.checks_loaders_and_exporters",
+]
+
+[tool.bumpversion]
+current_version = "0.0.1"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+search = "{current_version}"
+replace = "{new_version}"
+regex = false
+ignore_missing_version = false
+ignore_missing_files = false
+tag = true
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = false
+commit = true
+message = "Bump version: {current_version} → {new_version}"
+commit_args = "--no-verify"
+
+[project.optional-dependencies]
+dev = [
+    "coverage",
+    "myst-parser",
+    "pytest",
+    "python-dotenv",
+    "toml",
+    "bump_my_version",
+    "mkdocs",
+    "mkdocs-material",
+    "mkdocstrings[python]",
+    "mkdocs-git-revision-date-localized-plugin",
+    "mkdocs-jupyter",
+    "mkdocs-mermaid2-plugin"
+]
+
+[tool.setuptools]
+zip-safe = false
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    ]
+ignore = ["D203", "E203"]
+
+[tool.ruff]
+line-length = 101
+
+[tool.ruff.format]
+line-ending = "auto"
+
+# `bandit' configurations
+[tool.bandit]
+exclude_dirs = ["tests", "docs"]
+skips = []
+
+[tool.coverage.run]
+omit = [
+    "tests/*"
+]
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::UserWarning"]

@@ -1,0 +1,12 @@
+{
+    "columns": {
+        "a": {
+            "type": "float",
+            "optional": true
+        },
+        "b": {
+            "type": "str",
+            "optional": true
+        }
+    }
+}

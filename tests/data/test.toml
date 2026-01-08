@@ -1,0 +1,7 @@
+[columns.a]
+type = "double"
+optional = true
+
+[columns.b]
+type = "character"
+optional = true

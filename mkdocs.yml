@@ -1,0 +1,89 @@
+site_name: datachecker
+repo_url: https://gitlab-app-l-01/ASAP/py-onsdatavalidator/
+repo_name: datachecker
+site_description: A Python package for validating datasets against predefined checks.
+nav:
+  - Home: index.md
+  - Examples: user_guide/examples.md
+  - Changelog: changelog.md
+  - Contributing:
+    - Contributing Guide: contributor_guide/CONTRIBUTING.md
+    - Code of Conduct: contributor_guide/CODE_OF_CONDUCT.md
+    - Using Pytest: contributor_guide/using_pytest.md
+  - API Reference: 
+    - main: api_reference/main.md
+    - checks: api_reference/checks.md
+    - schema loader: api_reference/schema_loader.md
+    - validator exporter: api_reference/validator_exporter.md
+theme:
+  logo: "_static/af-logo.png"
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: red
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+  features:
+    - content.code.copy
+    - content.code.annotate
+    - navigation.path
+    - navigation.sections
+    - toc.integrate
+    - navigation.tabs
+    - search.suggest
+    - navigation.top
+    - navigation.expand
+    - navigation.tabs.sticky
+    - navigation.footer
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - toc:
+      toc_depth: 2
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+plugins:
+  - mkdocstrings
+  - search
+
+extra_css:
+  - _static/mkdocs_custom.css
+
+copyright: Copyright &copy; Office for National Statistics 2025
