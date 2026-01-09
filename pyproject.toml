@@ -1,7 +1,7 @@
 [project]
 name = "datachecker"
 description = "A placeholder description for your python project"
-version = "0.0.1"
+version = "1.0.0"
 authors = [
     {"name" = "ONS"}
 ]
@@ -29,7 +29,7 @@ include = [
 ]
 
 [tool.bumpversion]
-current_version = "0.0.1"
+current_version = "1.0.0"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
