@@ -84,7 +84,7 @@ plugins:
   - search
 
 extra_css:
-  - _static/mkdocs_custom.css
+  - assets/mkdocs_custom.css
 
 
 copyright: Copyright &copy; Office for National Statistics 2026
