@@ -160,6 +160,13 @@ class Validator:
             format = schema.split(".")[-1]
             schema = SchemaLoader.load(schema, format)
 
+        # Handles case where type is given as string, "str" will pass check
+        # "object" will also pass checks but "string" fails for some reason, this fixes
+        if isinstance(schema, dict) and "columns" in schema:
+            for _col, props in schema["columns"].items():
+                if "type" in props and props["type"] == "string":
+                    props["type"] = "str"
+
         return schema
 
     def _hard_check_status(self):
@@ -195,14 +202,23 @@ class Validator:
         # Optional method to format log descriptions for better readability
 
         regex_replacements = [
-            (r"str_length\(\s*(\d+)\s*,\s*None\s*\)", r"string length greater than or equal to \1"),
-            (r"str_length\(\s*(\d+)\s*,\s*(\d+)\s*\)", r"string length between \1 and \2"),
-            (r"str_length\(\s*None\s*,\s*(\d+)\s*\)", r"string length less than or equal to \1"),
+            (
+                r"str_length\(\s*(\d+(?:\.\d+)?)\s*,\s*None\s*\)",
+                r"string length greater than or equal to \1",
+            ),
+            (
+                r"str_length\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\s*\)",
+                r"string length between \1 and \2",
+            ),
+            (
+                r"str_length\(\s*None\s*,\s*(\d+(?:\.\d+)?)\s*\)",
+                r"string length less than or equal to \1",
+            ),
             (r"dtype\('(\S+)'\)", r"is data type \1"),
             (r"isin\(\s*\[([^\]]+)\]\s*\)", r"contains only [\1]"),
             (r"str_matches\(\s*r?['\"](.*?)['\"]\s*\)", r"string matches pattern '\1'"),
-            (r"greater_than_or_equal_to\(\s*(\d+)\s*\)", r"greater than or equal to \1"),
-            (r"less_than_or_equal_to\(\s*(\d+)\s*\)", r"less than or equal to \1"),
+            (r"greater_than_or_equal_to\(\s*(\d+(?:\.\d+)?)\s*\)", r"greater than or equal to \1"),
+            (r"less_than_or_equal_to\(\s*(\d+(?:\.\d+)?)\s*\)", r"less than or equal to \1"),
             (r"less_than_or_equal_to\(\s*(\S{10}\s+\S{8})\s*\)", r"before or equal to \1"),
             (r"greater_than_or_equal_to\(\s*(\S{10}\s+\S{8})\s*\)", r"after or equal to \1"),
             # Add more regex patterns as needed

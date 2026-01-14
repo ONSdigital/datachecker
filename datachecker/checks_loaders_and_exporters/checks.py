@@ -238,17 +238,17 @@ def convert_schema(schema: dict, custom_checks: dict = None) -> pa.DataFrameSche
             checks.append(min_val(constraints["min_val"]))
         if "max_val" in constraints:
             checks.append(max_val(constraints["max_val"]))
-        if "min_length" in constraints and column_type is str:
+        if "min_length" in constraints:
             checks.append(string_length(min_length=constraints["min_length"]))
-        if "max_length" in constraints and column_type is str:
+        if "max_length" in constraints:
             checks.append(string_length(max_length=constraints["max_length"]))
-        if "allowed_strings" in constraints and column_type is str:
+        if "allowed_strings" in constraints:
             checks.append(allowed_strings(constraints["allowed_strings"]))
-        if "forbidden_strings" in constraints and column_type is str:
+        if "forbidden_strings" in constraints:
             checks.append(forbidden_strings(constraints["forbidden_strings"]))
-        if "min_decimal" in constraints and column_type is float:
+        if "min_decimal" in constraints:
             checks.append(min_decimal(constraints["min_decimal"]))
-        if "max_decimal" in constraints and column_type is float:
+        if "max_decimal" in constraints:
             checks.append(max_decimal(constraints["max_decimal"]))
         if (
             "max_date" in constraints or "max_datetime" in constraints
