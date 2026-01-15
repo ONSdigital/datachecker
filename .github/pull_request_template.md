@@ -13,7 +13,6 @@ Please indicate items that aren't necessary and why, with comments around incomp
 - [ ] Version number has been incremented, according to [SemVer][semver]
 - [ ] Changelog has been updated, listing changes to this version. Use the [keep a changelog][changelog] format
 - [ ] New features are tested
-- [ ] New features follow the Analysis Function Releasing statistics in spreadsheets [guidance][guidance]
 - [ ] New features are documented using the [numpydoc][numpy-docstrings] docstring format
 - [ ] Other relevant package documentation is updated
 - [ ] For new functionality, examples are included in the docs or a [feature request][feature-request] has
