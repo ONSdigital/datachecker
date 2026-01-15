@@ -3,6 +3,7 @@ import platform
 import re
 import warnings
 from importlib.metadata import version
+from itertools import product
 
 import pandas as pd
 import pandera
@@ -138,7 +139,7 @@ class Validator:
                 failing_ids = failing_ids[:10] + ["..."]
         else:
             failing_ids = []
-            n_failing = None
+            n_failing = 0
         timestamp = pd.Timestamp.now().strftime("%H:%M:%S")
 
         log_entry = {
@@ -159,6 +160,13 @@ class Validator:
         if isinstance(schema, str):
             format = schema.split(".")[-1]
             schema = SchemaLoader.load(schema, format)
+
+        # Handles case where type is given as string, "str" will pass check
+        # "object" will also pass checks but "string" fails for some reason, this fixes
+        if isinstance(schema, dict) and "columns" in schema:
+            for _col, props in schema["columns"].items():
+                if "type" in props and props["type"] == "string":
+                    props["type"] = "str"
 
         return schema
 
@@ -195,14 +203,23 @@ class Validator:
         # Optional method to format log descriptions for better readability
 
         regex_replacements = [
-            (r"str_length\(\s*(\d+)\s*,\s*None\s*\)", r"string length greater than or equal to \1"),
-            (r"str_length\(\s*(\d+)\s*,\s*(\d+)\s*\)", r"string length between \1 and \2"),
-            (r"str_length\(\s*None\s*,\s*(\d+)\s*\)", r"string length less than or equal to \1"),
+            (
+                r"str_length\(\s*(\d+(?:\.\d+)?)\s*,\s*None\s*\)",
+                r"string length greater than or equal to \1",
+            ),
+            (
+                r"str_length\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\s*\)",
+                r"string length between \1 and \2",
+            ),
+            (
+                r"str_length\(\s*None\s*,\s*(\d+(?:\.\d+)?)\s*\)",
+                r"string length less than or equal to \1",
+            ),
             (r"dtype\('(\S+)'\)", r"is data type \1"),
             (r"isin\(\s*\[([^\]]+)\]\s*\)", r"contains only [\1]"),
             (r"str_matches\(\s*r?['\"](.*?)['\"]\s*\)", r"string matches pattern '\1'"),
-            (r"greater_than_or_equal_to\(\s*(\d+)\s*\)", r"greater than or equal to \1"),
-            (r"less_than_or_equal_to\(\s*(\d+)\s*\)", r"less than or equal to \1"),
+            (r"greater_than_or_equal_to\(\s*(\d+(?:\.\d+)?)\s*\)", r"greater than or equal to \1"),
+            (r"less_than_or_equal_to\(\s*(\d+(?:\.\d+)?)\s*\)", r"less than or equal to \1"),
             (r"less_than_or_equal_to\(\s*(\S{10}\s+\S{8})\s*\)", r"before or equal to \1"),
             (r"greater_than_or_equal_to\(\s*(\S{10}\s+\S{8})\s*\)", r"after or equal to \1"),
             # Add more regex patterns as needed
@@ -283,6 +300,8 @@ class DataValidator(Validator):
         for check in (
             self._check_colnames,
             self._check_column_contents,
+            self._check_duplicates,
+            self._check_completeness,
         ):
             check()
         # Formatting to convert pandera descriptions to more readable format
@@ -430,6 +449,38 @@ class DataValidator(Validator):
             outcome=not unused_keys,
             entry_type="warning",
         )
+
+    def _check_duplicates(self):
+        # Check for duplicate rows in the dataframe
+        if self.schema.get("check_duplicates", False):
+            duplicate_rows = self.data[self.data.duplicated(keep="first")]
+            duplicate_indices = duplicate_rows.index.tolist()
+            self._add_qa_entry(
+                description="Checking for duplicate rows in the dataframe",
+                failing_ids=duplicate_indices,
+                outcome=not duplicate_indices,
+                entry_type="error",
+            )
+
+    def _check_completeness(self):
+        if self.schema.get("check_completeness", False):
+            cols_to_check = self.schema.get("completeness_columns", self.data.columns.tolist())
+            # Generate all possible combinations of the column values
+            unique_values = [self.data[col].dropna().unique() for col in cols_to_check]
+            combinations = set(product(*unique_values))
+            existing_combinations = set(map(tuple, self.data[cols_to_check].dropna().values))
+            missing_combinations = combinations - existing_combinations
+            result = len(missing_combinations) == 0
+            if len(cols_to_check) > 4:
+                cols_to_check = cols_to_check[:4] + ["..."]
+            formatted_cols_to_check = ", ".join(cols_to_check)
+            self._add_qa_entry(
+                description="Checking for missing rows in the dataframe "
+                + f"columns: {formatted_cols_to_check}",
+                failing_ids=None,
+                outcome=result,
+                entry_type="error",
+            )
 
 
 def check_and_export(
