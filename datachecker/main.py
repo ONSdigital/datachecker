@@ -296,10 +296,7 @@ class DataValidator(Validator):
         super().__init__(schema, data, file, format, hard_check, custom_checks)
 
     def validate(self):
-        for check in (
-            self._check_colnames,
-            self._check_column_contents,
-        ):
+        for check in (self._check_colnames, self._check_column_contents, self._check_duplicates):
             check()
         # Formatting to convert pandera descriptions to more readable format
         self._format_log_descriptions()
@@ -445,6 +442,21 @@ class DataValidator(Validator):
             failing_ids=list(unused_keys),
             outcome=not unused_keys,
             entry_type="warning",
+        )
+
+    def _check_duplicates(self):
+        # Check for duplicate rows in the dataframe
+        if self.schema.get("check_duplicates", False):
+            duplicate_rows = self.data[self.data.duplicated(keep="first")]
+            duplicate_indices = duplicate_rows.index.tolist()
+        else:
+            duplicate_indices = []
+
+        self._add_qa_entry(
+            description="Checking for duplicate rows in the dataframe",
+            failing_ids=duplicate_indices,
+            outcome=not duplicate_indices,
+            entry_type="error",
         )
 
 
