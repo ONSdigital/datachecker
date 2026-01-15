@@ -2,10 +2,12 @@ import time
 
 import pandas as pd
 
-from datachecker import DataValidator
+from datachecker import DataValidator, check_and_export
 
 tic = time.time()
 schema = {
+    "check_duplicates": True,
+    "check_completeness": False,
     "columns": {
         "age": {"type": float, "min_val": 0, "max_val": 120, "allow_na": False, "optional": False},
         "name": {
@@ -31,7 +33,7 @@ schema = {
             "allow_na": False,
             "optional": False,
         },
-    }
+    },
 }
 
 data = [
@@ -69,10 +71,21 @@ data = [
 
 df = pd.DataFrame(data)
 
-new_validator = DataValidator(schema=schema, data=df, file="output_report.html", format="html")
+new_validator = DataValidator(
+    schema=schema, data=df, file="output_report.html", format="html", hard_check=False
+)
 
 new_validator.validate()
 new_validator.export()
 print(new_validator)
 toc = time.time()
 print(f"Validation completed in {toc - tic:.2f} seconds.")
+
+# Alternative using check_and_export function
+check_and_export(
+    schema=schema,
+    data=df,
+    file="output_report_function.html",
+    format="html",
+    hard_check=False,
+)
