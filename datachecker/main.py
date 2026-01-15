@@ -3,6 +3,7 @@ import platform
 import re
 import warnings
 from importlib.metadata import version
+from itertools import product
 
 import pandas as pd
 import pandera
@@ -138,7 +139,7 @@ class Validator:
                 failing_ids = failing_ids[:10] + ["..."]
         else:
             failing_ids = []
-            n_failing = None
+            n_failing = 0
         timestamp = pd.Timestamp.now().strftime("%H:%M:%S")
 
         log_entry = {
@@ -296,7 +297,12 @@ class DataValidator(Validator):
         super().__init__(schema, data, file, format, hard_check, custom_checks)
 
     def validate(self):
-        for check in (self._check_colnames, self._check_column_contents, self._check_duplicates):
+        for check in (
+            self._check_colnames,
+            self._check_column_contents,
+            self._check_duplicates,
+            self._check_completeness,
+        ):
             check()
         # Formatting to convert pandera descriptions to more readable format
         self._format_log_descriptions()
@@ -449,15 +455,32 @@ class DataValidator(Validator):
         if self.schema.get("check_duplicates", False):
             duplicate_rows = self.data[self.data.duplicated(keep="first")]
             duplicate_indices = duplicate_rows.index.tolist()
-        else:
-            duplicate_indices = []
+            self._add_qa_entry(
+                description="Checking for duplicate rows in the dataframe",
+                failing_ids=duplicate_indices,
+                outcome=not duplicate_indices,
+                entry_type="error",
+            )
 
-        self._add_qa_entry(
-            description="Checking for duplicate rows in the dataframe",
-            failing_ids=duplicate_indices,
-            outcome=not duplicate_indices,
-            entry_type="error",
-        )
+    def _check_completeness(self):
+        if self.schema.get("check_completeness", False):
+            cols_to_check = self.schema.get("completeness_columns", self.data.columns.tolist())
+            # Generate all possible combinations of the column values
+            unique_values = [self.data[col].dropna().unique() for col in cols_to_check]
+            combinations = set(product(*unique_values))
+            existing_combinations = set(map(tuple, self.data[cols_to_check].dropna().values))
+            missing_combinations = combinations - existing_combinations
+            result = len(missing_combinations) == 0
+            if len(cols_to_check) > 4:
+                cols_to_check = cols_to_check[:4] + ["..."]
+            formatted_cols_to_check = ", ".join(cols_to_check)
+            self._add_qa_entry(
+                description="Checking for missing rows in the dataframe "
+                + f"columns: {formatted_cols_to_check}",
+                failing_ids=None,
+                outcome=result,
+                entry_type="error",
+            )
 
 
 def check_and_export(

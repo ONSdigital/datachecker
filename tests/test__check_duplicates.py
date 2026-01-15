@@ -27,7 +27,6 @@ class TestCheckDuplicates:
             for entry in validator.log[1:]
             if "Checking for duplicate rows in the dataframe" in entry["description"]
         ][0]
-        assert "Checking for duplicate rows in the dataframe" in dupe_log_entry["description"]
         assert dupe_log_entry["outcome"] == "pass"
 
     def test__check_duplicates_found(self):
@@ -38,5 +37,4 @@ class TestCheckDuplicates:
             for entry in validator.log[1:]
             if "Checking for duplicate rows in the dataframe" in entry["description"]
         ][0]
-        assert "Checking for duplicate rows in the dataframe" in dupe_log_entry["description"]
         assert dupe_log_entry["outcome"] == "fail"
