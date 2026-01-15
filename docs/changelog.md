@@ -8,17 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- 
+- Checks for duplicates and completeness
 
 ### Changed
 - 
 
 
 ### Removed
-- 
+- Type checking when creating checks for pandera schema (checking column type is unaffected)
 
 ### Fixed
-- 
+- Issue with type when loading schema from file
+- Issue where string checks would not be added to pandera schema when loaded from file
 
 ## [1.0.0] - 2026-01-09
 
