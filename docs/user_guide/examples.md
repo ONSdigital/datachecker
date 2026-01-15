@@ -7,10 +7,12 @@ First we need to import the needed modules and load / create the schema. The con
 Our schema we are expecting age to be a `float` with minimum value of 0 and max of 120. Name is a `string` with at least 2 characters. Email is also a string but we are using a regular expression (Regex) to test the format is correct for a valid email. Finally we are expecting `is_active` to be an integer.
 
 ```Python
-from datachecker import DataValidator
+from datachecker import DataValidator, check_and_export
 import pandas as pd
 
 schema = {
+    "check_duplicates": True,
+    "check_completeness": False,
     "columns": {
         "age": {
             "type": float,
@@ -73,6 +75,18 @@ new_validator = DataValidator(
 new_validator.validate()
 new_validator.export()
 print(new_validator)
+```
+
+Alternatively we can use check_and_export function to (as the name suggests!) perform our checks and directly export our log.
+
+```Python
+check_and_export(
+    schema=schema,
+    data=df,
+    file="output_report_function.html",
+    format="html",
+    hard_check=False,
+)
 ```
 
 Now looking at the contents of the yaml or command line we can see our dataframe has passed most validation checks. 
