@@ -5,7 +5,7 @@ import tempfile
 import pandas as pd
 import pytest
 
-from datachecker.main import DataValidator, check_and_export
+from datachecker.main import DataValidator, PolarsValidator, check_and_export
 
 data = {"id": [1, 2, 3], "name": ["Alice", "Bob", "Charlie"], "age": [25, 30, 35]}
 mock_df = pd.DataFrame(data)
@@ -176,3 +176,41 @@ class TestCheckAndExport:
                 hard_check=True,
             )
         assert os.path.exists(tmpfile.name)
+
+
+class TestPolarsValidaor:
+    def test_polars_validator(self):
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "id": [1, 2, 3, 2],
+                "name": ["Alice", "Bob", "Charlie", "Bob"],
+                "score": [90.5, 82.0, 95.25, 82.0],
+                "passed": [True, True, True, True],
+            }
+        )
+
+        schema = {
+            "check_duplicates": True,
+            "check_completeness": True,
+            "columns": {
+                "id": {"type": "int", "nullable": False},
+                "name": {"type": "str", "nullable": False},
+                "score": {"type": "float", "nullable": False, "min": 0, "max": 100},
+                "passed": {"type": "bool", "nullable": False},
+            },
+        }
+
+        new_validator = PolarsValidator(
+            schema=schema, data=df, file="temp.html", format="html", hard_check=False
+        )
+        new_validator.validate()
+        new_validator.export()
+
+        assert isinstance(new_validator, PolarsValidator)
+        assert len(new_validator.log) > 0
+        assert os.path.exists("temp.html")
+
+        # Clean up
+        os.remove("temp.html")

@@ -20,10 +20,10 @@ def test_convert_schema():
             },
         }
     }
-
-    schema_obj = convert_schema(schema_dict)
-
     df = pd.DataFrame({"id": [-10, 50, 101], "age": [25.0, 120.0, -1.0], "sex": ["M", "F", "X"]})
+
+    schema_obj = convert_schema(schema_dict, df)
+
     try:
         schema_obj.validate(df, lazy=True)
     except pa.errors.SchemaErrors as e:
@@ -44,8 +44,8 @@ def test_validate_allow_na():
             },
         }
     }
-    schema_obj = convert_schema(schema_dict)
     df = pd.DataFrame({"id": [-10, None, 101], "age": [25.0, None, -1.0]})
+    schema_obj = convert_schema(schema_dict, df)
     result = validate_using_pandera(schema_obj, df)
     # 1) Check that a row is included with "id" and "not_nullable"
     assert any(
@@ -73,14 +73,14 @@ def test_adding_passing_data_checks():
             },
         }
     }
+    df = pd.DataFrame({"id": [10.0, 50.0, 90.0], "age": [25.0, 30.0, 35.0], "sex": ["M", "F", "M"]})
 
-    schema_obj = convert_schema(schema_dict)
+    schema_obj = convert_schema(schema_dict, df)
     # ID data check should fail
     # id: 3 checks, type min and max
     # age: 3 checks, type min and max
     # sex: 4 checks, type, min_length, max_length, allowed_strings
     # age and sex data checks should pass
-    df = pd.DataFrame({"id": [10.0, 50.0, 90.0], "age": [25.0, 30.0, 35.0], "sex": ["M", "F", "M"]})
     result = validate_using_pandera(schema_obj, df)
 
     expected_output_groupby = pd.Series({"id": 3, "age": 3, "sex": 4})
@@ -101,8 +101,8 @@ class TestStringChecks:
                 },
             }
         }
-        schema_obj = convert_schema(schema_dict)
         df = pd.DataFrame({"code": ["A1", "B2", "D4", "E5", "f6"]})
+        schema_obj = convert_schema(schema_dict, df)
         try:
             schema_obj.validate(df, lazy=True)
         except pa.errors.SchemaErrors as e:
@@ -119,8 +119,9 @@ class TestStringChecks:
                 },
             }
         }
+        df = pd.DataFrame({"code": ["A1", "B2", "D4", "E5", "f6"]})
         try:
-            convert_schema(schema_dict)
+            convert_schema(schema_dict, df)
         except TypeError as e:
             assert str(e) == "allowed_strings value must be a list or string"
 
@@ -134,8 +135,10 @@ class TestStringChecks:
                 },
             }
         }
+        df = pd.DataFrame({"code": ["A1", "B2", "D4", "E5", "f6"]})
+
         try:
-            convert_schema(schema_dict)
+            convert_schema(schema_dict, df)
         except TypeError as e:
             assert str(e) == "forbidden_strings value must be a list or string"
 
@@ -149,8 +152,9 @@ class TestStringChecks:
                 },
             }
         }
+        df = pd.DataFrame({"code": ["A1", "B2", "D4", "E5", "f6"]})
         try:
-            convert_schema(schema_dict)
+            convert_schema(schema_dict, df)
         except TypeError as e:
             assert str(e) == (
                 "String patterns are not supported for forbidden_strings, "
@@ -167,8 +171,8 @@ class TestStringChecks:
                 },
             }
         }
-        schema_obj = convert_schema(schema_dict)
         df = pd.DataFrame({"code": ["A1", "B2", "D4", "E5", "f6"]})
+        schema_obj = convert_schema(schema_dict, df)
         try:
             schema_obj.validate(df, lazy=True)
         except pa.errors.SchemaErrors as e:
@@ -190,7 +194,7 @@ class TestDecimalChecks:
                 },
             }
         }
-        schema_obj = convert_schema(schema_dict)
+        schema_obj = convert_schema(schema_dict, self.df)
         try:
             schema_obj.validate(self.df, lazy=True)
         except pa.errors.SchemaErrors as e:
@@ -208,7 +212,7 @@ class TestDecimalChecks:
                 },
             }
         }
-        schema_obj = convert_schema(schema_dict)
+        schema_obj = convert_schema(schema_dict, self.df)
         try:
             schema_obj.validate(self.df, lazy=True)
         except pa.errors.SchemaErrors as e:
@@ -231,7 +235,7 @@ class TestDateTimeChecks:
                 },
             }
         }
-        schema_obj = convert_schema(schema_dict)
+        schema_obj = convert_schema(schema_dict, self.df)
         try:
             schema_obj.validate(self.df, lazy=True)
         except pa.errors.SchemaErrors as e:
@@ -249,7 +253,7 @@ class TestDateTimeChecks:
                 },
             }
         }
-        schema_obj = convert_schema(schema_dict)
+        schema_obj = convert_schema(schema_dict, self.df)
         try:
             schema_obj.validate(self.df, lazy=True)
         except pa.errors.SchemaErrors as e:
@@ -267,7 +271,7 @@ class TestDateTimeChecks:
                 },
             }
         }
-        schema_obj = convert_schema(schema_dict)
+        schema_obj = convert_schema(schema_dict, self.df)
         try:
             schema_obj.validate(self.df, lazy=True)
         except pa.errors.SchemaErrors as e:
@@ -285,7 +289,7 @@ class TestDateTimeChecks:
                 },
             }
         }
-        schema_obj = convert_schema(schema_dict)
+        schema_obj = convert_schema(schema_dict, self.df)
         try:
             schema_obj.validate(self.df, lazy=True)
         except pa.errors.SchemaErrors as e:
@@ -318,7 +322,7 @@ class TestingCustomChecks:
             "adult_income_check": lambda df: (df["income"] > 0) & (df["age"] >= 18),
         }
 
-        schema_obj = convert_schema(self.schema, custom_checks=custom_checks_dict)
+        schema_obj = convert_schema(self.schema, self.df, custom_checks=custom_checks_dict)
 
         try:
             schema_obj.validate(self.df, lazy=True)

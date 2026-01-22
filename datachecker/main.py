@@ -278,6 +278,74 @@ class Validator:
                 + wide_checks_entries
             )
 
+    def _check_colnames(self):
+        # Check column names do not contain symbols other than underscore or spaces
+        invalid_cols = [
+            col for col in self.data.columns if not all(c.isalnum() or c in ["_"] for c in col)
+        ]
+        self._add_qa_entry(
+            description="Checking column names",
+            failing_ids=invalid_cols,
+            outcome=not invalid_cols,
+            entry_type="error",
+        )
+
+        # Check column names are all lowercase
+        uppercase_cols = [col for col in self.data.columns if any(c.isupper() for c in col)]
+        self._add_qa_entry(
+            description="Checking column names are lowercase",
+            failing_ids=uppercase_cols,
+            outcome=not uppercase_cols,
+            entry_type="warning",
+        )
+
+        # Check mandatory columns are present
+        missing_mandatory = [
+            col
+            for col, props in self.schema.get("columns", {}).items()
+            if not props.get("optional", False) and col not in self.data.columns
+        ]
+        self._add_qa_entry(
+            description="Checking mandatory columns are present",
+            failing_ids=missing_mandatory,
+            outcome=not missing_mandatory,
+            entry_type="error",
+        )
+
+        # Check no unexpected columns are present
+        unexpected_cols = [
+            col for col in self.data.columns if col not in self.schema.get("columns", {})
+        ]
+        self._add_qa_entry(
+            description="Checking for unexpected columns",
+            failing_ids=unexpected_cols,
+            outcome=not unexpected_cols,
+            entry_type="warning",
+        )
+
+    def _check_column_contents(self, converted_schema=None):
+        # code to pass through converted schema. helps unit testing
+        if converted_schema is None:
+            converted_schema = convert_schema(self.schema, self.data, self.custom_checks)
+        grouped_validation_return = validate_using_pandera(converted_schema, data=self.data)
+        # Issue, only failed data type checks are returned from pandera validation
+        if grouped_validation_return is not None:
+            for i in grouped_validation_return.index:
+                entry_description = (
+                    f"Checking {grouped_validation_return.at[i, 'column']} "
+                    + f"{grouped_validation_return.at[i, 'check']}"
+                )
+                invalid_ids = grouped_validation_return.at[i, "invalid_ids"]
+                if invalid_ids == [None]:
+                    invalid_ids = grouped_validation_return.at[i, "failure_case"]
+
+                self._add_qa_entry(
+                    description=entry_description,
+                    failing_ids=invalid_ids,
+                    outcome=not bool(invalid_ids),
+                    entry_type="error",
+                )
+
 
 class DataValidator(Validator):
     """
@@ -298,8 +366,8 @@ class DataValidator(Validator):
 
     def validate(self):
         for check in (
-            self._check_colnames,
-            self._check_column_contents,
+            super()._check_colnames,
+            super()._check_column_contents,
             self._check_duplicates,
             self._check_completeness,
         ):
@@ -350,74 +418,6 @@ class DataValidator(Validator):
         self._check_unused_schema_arguments(schema)
 
         return schema
-
-    def _check_colnames(self):
-        # Check column names do not contain symbols other than underscore or spaces
-        invalid_cols = [
-            col for col in self.data.columns if not all(c.isalnum() or c in ["_"] for c in col)
-        ]
-        self._add_qa_entry(
-            description="Checking column names",
-            failing_ids=invalid_cols,
-            outcome=not invalid_cols,
-            entry_type="error",
-        )
-
-        # Check column names are all lowercase
-        uppercase_cols = [col for col in self.data.columns if any(c.isupper() for c in col)]
-        self._add_qa_entry(
-            description="Checking column names are lowercase",
-            failing_ids=uppercase_cols,
-            outcome=not uppercase_cols,
-            entry_type="warning",
-        )
-
-        # Check mandatory columns are present
-        missing_mandatory = [
-            col
-            for col, props in self.schema.get("columns", {}).items()
-            if not props.get("optional", False) and col not in self.data.columns
-        ]
-        self._add_qa_entry(
-            description="Checking mandatory columns are present",
-            failing_ids=missing_mandatory,
-            outcome=not missing_mandatory,
-            entry_type="error",
-        )
-
-        # Check no unexpected columns are present
-        unexpected_cols = [
-            col for col in self.data.columns if col not in self.schema.get("columns", {})
-        ]
-        self._add_qa_entry(
-            description="Checking for unexpected columns",
-            failing_ids=unexpected_cols,
-            outcome=not unexpected_cols,
-            entry_type="warning",
-        )
-
-    def _check_column_contents(self, converted_schema=None):
-        # code to pass through converted schema. helps unit testing
-        if converted_schema is None:
-            converted_schema = convert_schema(self.schema, self.custom_checks)
-        grouped_validation_return = validate_using_pandera(converted_schema, data=self.data)
-        # Issue, only failed data type checks are returned from pandera validation
-        if grouped_validation_return is not None:
-            for i in grouped_validation_return.index:
-                entry_description = (
-                    f"Checking {grouped_validation_return.at[i, 'column']} "
-                    + f"{grouped_validation_return.at[i, 'check']}"
-                )
-                invalid_ids = grouped_validation_return.at[i, "invalid_ids"]
-                if invalid_ids == [None]:
-                    invalid_ids = grouped_validation_return.at[i, "failure_case"]
-
-                self._add_qa_entry(
-                    description=entry_description,
-                    failing_ids=invalid_ids,
-                    outcome=not bool(invalid_ids),
-                    entry_type="error",
-                )
 
     def _check_unused_schema_arguments(self, schema):
         # Unused arguments in schema.
@@ -483,6 +483,98 @@ class DataValidator(Validator):
             )
 
 
+class PolarsValidator(Validator):
+    def __init__(
+        self,
+        schema: dict,
+        data: pl.DataFrame,
+        file: str,
+        format: str,
+        hard_check: bool = True,
+        custom_checks: dict = None,
+    ):
+        super().__init__(schema, data, file, format, hard_check, custom_checks)
+
+    def validate(self):
+        for check in (
+            super()._check_colnames,
+            self._check_column_contents,
+            self._check_duplicates,
+            self._check_completeness,
+        ):
+            check()
+        # Formatting to convert pandera descriptions to more readable format
+        self._format_log_descriptions()
+        self._convert_frame_wide_check_to_single_entry()
+        return self
+
+    def _check_unused_schema_arguments(self, schema):
+        # Unused arguments in schema.
+        valid_schema_keys = {
+            "type",
+            "min_val",
+            "max_val",
+            "min_length",
+            "max_length",
+            "allowed_strings",
+            "forbidden_strings",
+            "allow_na",
+            "optional",
+            "min_decimal",
+            "max_decimal",
+            "max_date",
+            "min_date",
+            "max_datetime",
+            "min_datetime",
+        }
+        unpacked_keys = []
+        for _col, item in schema["columns"].items():
+            unpacked_keys.extend(item.keys())
+        unpacked_keys = set(unpacked_keys)
+        unused_keys = unpacked_keys.difference(valid_schema_keys)
+        self._add_qa_entry(
+            description="Checking for unused arguments in schema",
+            failing_ids=list(unused_keys),
+            outcome=not unused_keys,
+            entry_type="warning",
+        )
+
+    def _check_duplicates(self):
+        # Check for duplicate rows in the dataframe
+        if self.schema.get("check_duplicates", False):
+            df_with_row_nr = self.data.with_row_index("_row_nr")
+            duplicate_indices = (
+                df_with_row_nr.filter(self.data.is_duplicated()).get_column("_row_nr").to_list()
+            )
+            # Polars doesn't have a pandas-style index; return row numbers instead
+            self._add_qa_entry(
+                description="Checking for duplicate rows in the dataframe",
+                failing_ids=duplicate_indices,
+                outcome=not duplicate_indices,
+                entry_type="error",
+            )
+
+    def _check_completeness(self):
+        if self.schema.get("check_completeness", False):
+            cols_to_check = self.schema.get("completeness_columns", self.data.columns)
+            # Generate all possible combinations of the column values
+            unique_values = [self.data[col].drop_nulls().unique() for col in cols_to_check]
+            combinations = set(product(*unique_values))
+            existing_combinations = set(map(tuple, self.data[cols_to_check].drop_nulls().to_numpy()))
+            missing_combinations = combinations - existing_combinations
+            result = len(missing_combinations) == 0
+            if len(cols_to_check) > 4:
+                cols_to_check = cols_to_check[:4] + ["..."]
+            formatted_cols_to_check = ", ".join(cols_to_check)
+            self._add_qa_entry(
+                description="Checking for missing rows in the dataframe "
+                + f"columns: {formatted_cols_to_check}",
+                failing_ids=None,
+                outcome=result,
+                entry_type="error",
+            )
+
+
 def check_and_export(
     schema, data, file, format, hard_check=True, custom_checks=None
 ) -> DataValidator:
@@ -514,15 +606,23 @@ def check_and_export(
             "Polars Dataframes are not natively supported, converting to Pandas for validation.",
             stacklevel=2,
         )
-        data = data.to_pandas()
-    validator = DataValidator(
-        schema=schema,
-        data=data,
-        file=file,
-        format=format,
-        hard_check=hard_check,
-        custom_checks=custom_checks,
-    )
+        validator = PolarsValidator(
+            schema=schema,
+            data=data,
+            file=file,
+            format=format,
+            hard_check=hard_check,
+            custom_checks=custom_checks,
+        )
+    elif type(data) is pd.DataFrame:
+        validator = DataValidator(
+            schema=schema,
+            data=data,
+            file=file,
+            format=format,
+            hard_check=hard_check,
+            custom_checks=custom_checks,
+        )
 
     validator.validate()
     validator.export()

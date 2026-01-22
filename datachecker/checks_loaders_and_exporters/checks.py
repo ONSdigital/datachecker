@@ -1,9 +1,22 @@
 import pandas as pd
 import pandera.pandas as pa
+import pandera.polars as pap
+import polars as pl
+
+
+def get_dtype_lib(df) -> object:
+    if type(df) is pd.DataFrame:
+        return pa
+
+    elif type(df) is pl.DataFrame:
+        return pap
+
+    else:
+        raise TypeError("Unsupported DataFrame type")
 
 
 # Functions to create pandera checks based on schema column keys
-def min_val(value: int | float):
+def min_val(value: int | float, library=pa):
     """
     Create a pandera check for minimum value.
 
@@ -14,13 +27,13 @@ def min_val(value: int | float):
 
     Returns
     -------
-    pa.Check
+    get_dtype_lib().Check
         A pandera check for the minimum value.
     """
-    return pa.Check.ge(value)
+    return library.Check.ge(value)
 
 
-def max_val(value: int | float):
+def max_val(value: int | float, library=pa):
     """
     Create a pandera check for maximum value.
 
@@ -31,13 +44,13 @@ def max_val(value: int | float):
 
     Returns
     -------
-    pa.Check
+    get_dtype_lib().Check
         A pandera check for the maximum value.
     """
-    return pa.Check.le(value)
+    return library.Check.le(value)
 
 
-def string_length(max_length: int = None, min_length: int = None):
+def string_length(max_length: int = None, min_length: int = None, library=pa):
     """
     Create a pandera check for string length.
 
@@ -50,13 +63,13 @@ def string_length(max_length: int = None, min_length: int = None):
 
     Returns
     -------
-    pa.Check
+    get_dtype_lib().Check
         A pandera check for the string length.
     """
-    return pa.Check.str_length(max_value=max_length, min_value=min_length)
+    return library.Check.str_length(max_value=max_length, min_value=min_length)
 
 
-def allowed_strings(value: list | str):
+def allowed_strings(value: list | str, library=pa):
     """
     Create a pandera check for allowed strings.
 
@@ -67,18 +80,18 @@ def allowed_strings(value: list | str):
 
     Returns
     -------
-    pa.Check
+    get_dtype_lib().Check
         A pandera check for the allowed strings.
     """
     if isinstance(value, str):
-        return pa.Check.str_matches(value)
+        return library.Check.str_matches(value)
     elif isinstance(value, list):
-        return pa.Check.isin(value)
+        return library.Check.isin(value)
     else:
         raise TypeError("allowed_strings value must be a list or string")
 
 
-def forbidden_strings(value: list):
+def forbidden_strings(value: list, library=pa):
     """
     Create a pandera check for forbidden strings.
 
@@ -89,7 +102,7 @@ def forbidden_strings(value: list):
 
     Returns
     -------
-    pa.Check
+    get_dtype_lib().Check
         A pandera check for the forbidden strings.
 
     Raises
@@ -99,7 +112,7 @@ def forbidden_strings(value: list):
         TypeError if value is not a list or string.
     """
     if isinstance(value, list):
-        return pa.Check.notin(value)
+        return library.Check.notin(value)
     if isinstance(value, str):
         raise TypeError(
             "String patterns are not supported for forbidden_strings, "
@@ -109,7 +122,7 @@ def forbidden_strings(value: list):
         raise TypeError("forbidden_strings value must be a list or string")
 
 
-def min_decimal(value: int):
+def min_decimal(value: int, library=pa):
     """
     Create a pandera check for minimum decimal places for floats (possible with pandera
     decimal data type)
@@ -121,10 +134,10 @@ def min_decimal(value: int):
 
     Returns
     -------
-    pa.Check
+    get_dtype_lib().Check
         A pandera check for the minimum decimal places.
     """
-    return pa.Check(
+    return library.Check(
         lambda s: s.apply(
             lambda x: (
                 isinstance(x, float) and not pd.isnull(x) and len(str(x).split(".")[1]) >= value
@@ -137,7 +150,7 @@ def min_decimal(value: int):
     )
 
 
-def max_decimal(value: int):
+def max_decimal(value: int, library=pa):
     """
     Create a pandera check for maximum decimal places.
 
@@ -148,10 +161,10 @@ def max_decimal(value: int):
 
     Returns
     -------
-    pa.Check
+    get_dtype_lib().Check
         A pandera check for the maximum decimal places.
     """
-    return pa.Check(
+    return library.Check(
         lambda s: s.apply(
             lambda x: (
                 isinstance(x, float) and not pd.isnull(x) and len(str(x).split(".")[1]) <= value
@@ -164,7 +177,7 @@ def max_decimal(value: int):
     )
 
 
-def max_date(value: str):
+def max_date(value: str, library=pa):
     """
     Create a pandera check for maximum date.
 
@@ -177,14 +190,14 @@ def max_date(value: str):
 
     Returns
     -------
-    pa.Check
+    get_dtype_lib().Check
         A pandera check for the maximum date.
     """
     max_date_value = pd.to_datetime(value)
-    return pa.Check.le(max_date_value)
+    return library.Check.le(max_date_value)
 
 
-def min_date(value: str):
+def min_date(value: str, library=pa):
     """
     Create a pandera check for minimum date.
 
@@ -197,21 +210,23 @@ def min_date(value: str):
 
     Returns
     -------
-    pa.Check
+    get_dtype_lib().Check
         A pandera check for the minimum date.
     """
     min_date_value = pd.to_datetime(value)
-    return pa.Check.ge(min_date_value)
+    return library.Check.ge(min_date_value)
 
 
-def format_custom_checks(custom_checks: dict):
+def format_custom_checks(custom_checks: dict, library=pa) -> list:
     formatted_checks = []
     for check_name, check in custom_checks.items():
-        formatted_checks.append(pa.Check(check, name=check_name, error=check_name))
+        formatted_checks.append(library.Check(check, name=check_name, error=check_name))
     return formatted_checks
 
 
-def convert_schema(schema: dict, custom_checks: dict = None) -> pa.DataFrameSchema:
+def convert_schema(
+    schema: dict, df: pd.DataFrame | pl.DataFrame, custom_checks: dict = None
+) -> pa.DataFrameSchema:
     """
     Convert the loaded schema to a pandera DataFrameSchema. Uses simple defined
     functions to map schema keys to pandera checks. To add further checks, define
@@ -224,51 +239,70 @@ def convert_schema(schema: dict, custom_checks: dict = None) -> pa.DataFrameSche
 
     Returns
     -------
-    pa.DataFrameSchema
+    get_dtype_lib().DataFrameSchema
         The converted pandera DataFrameSchema.
     """
     # Convert JSON schema to pandera schema
     # Loop over each column in the JSON schema and create corresponding pandera Column objects
+    library = get_dtype_lib(df)
     pa_schema_format = {}
     for column_name, constraints in schema["columns"].items():
         column_type = constraints["type"]
         nullable = constraints.get("allow_na", False)
         checks = []
         if "min_val" in constraints:
-            checks.append(min_val(constraints["min_val"]))
+            checks.append(min_val(constraints["min_val"], library=library))
         if "max_val" in constraints:
-            checks.append(max_val(constraints["max_val"]))
+            checks.append(max_val(constraints["max_val"], library=library))
         if "min_length" in constraints:
-            checks.append(string_length(min_length=constraints["min_length"]))
+            checks.append(string_length(min_length=constraints["min_length"], library=library))
         if "max_length" in constraints:
-            checks.append(string_length(max_length=constraints["max_length"]))
+            checks.append(string_length(max_length=constraints["max_length"], library=library))
         if "allowed_strings" in constraints:
-            checks.append(allowed_strings(constraints["allowed_strings"]))
+            checks.append(allowed_strings(constraints["allowed_strings"], library=library))
         if "forbidden_strings" in constraints:
-            checks.append(forbidden_strings(constraints["forbidden_strings"]))
+            checks.append(forbidden_strings(constraints["forbidden_strings"], library=library))
         if "min_decimal" in constraints:
-            checks.append(min_decimal(constraints["min_decimal"]))
+            checks.append(min_decimal(constraints["min_decimal"], library=library))
         if "max_decimal" in constraints:
-            checks.append(max_decimal(constraints["max_decimal"]))
+            checks.append(max_decimal(constraints["max_decimal"], library=library))
         if (
             "max_date" in constraints or "max_datetime" in constraints
         ) and column_type is pd.Timestamp:
-            checks.append(max_date(constraints.get("max_date", constraints.get("max_datetime"))))
+            checks.append(
+                max_date(
+                    constraints.get("max_date", constraints.get("max_datetime")), library=library
+                )
+            )
         if (
             "min_date" in constraints or "min_datetime" in constraints
         ) and column_type is pd.Timestamp:
-            checks.append(min_date(constraints.get("min_date", constraints.get("min_datetime"))))
+            checks.append(
+                min_date(
+                    constraints.get("min_date", constraints.get("min_datetime")), library=library
+                )
+            )
 
         pa_type = column_type
+        if type(pa_type) is str:
+            pa_type = {
+                "int": int,
+                "float": float,
+                "str": str,
+                "bool": bool,
+                "datetime": pd.Timestamp,
+            }.get(pa_type)
 
-        pa_schema_format[column_name] = pa.Column(dtype=pa_type, checks=checks, nullable=nullable)
+        pa_schema_format[column_name] = library.Column(
+            dtype=pa_type, checks=checks, nullable=nullable
+        )
 
     if custom_checks is not None:
         formatted_custom_checks = format_custom_checks(custom_checks)
     else:
         formatted_custom_checks = []
 
-    return pa.DataFrameSchema(pa_schema_format, checks=formatted_custom_checks)
+    return library.DataFrameSchema(pa_schema_format, checks=formatted_custom_checks)
 
 
 def validate_using_pandera(
@@ -281,7 +315,7 @@ def validate_using_pandera(
 
     Parameters
     ----------
-    converted_schema : pa.DataFrameSchema
+    converted_schema : get_dtype_lib().DataFrameSchema
         The pandera DataFrameSchema to use for validation.
     data : pd.DataFrame
         The data to validate.
@@ -298,7 +332,7 @@ def validate_using_pandera(
 
         # The following code is to add all checks when validation passes
         grouped_validation_return = None
-    except pa.errors.SchemaErrors as e:
+    except get_dtype_lib(data).errors.SchemaErrors as e:
         # validation_return is now a pandas dataframe
         validation_return = e.failure_cases[["column", "check", "failure_case", "index"]]
         # Group by 'column' and 'check', collect failure cases and indices for each group
@@ -335,7 +369,7 @@ def convert_schema_into_log_entries(converted_schema: pa.DataFrameSchema) -> pd.
 
     Parameters
     ----------
-    converted_schema : pa.DataFrameSchema
+    converted_schema : get_dtype_lib().DataFrameSchema
         The pandera DataFrameSchema to convert.
 
     Returns
