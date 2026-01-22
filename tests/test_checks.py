@@ -2,8 +2,8 @@ import pandas as pd
 import pandera.pandas as pa
 import pytest
 
-from datachecker.checks_loaders_and_exporters.checks import convert_schema
-from datachecker.main import DataValidator, validate_using_pandera
+from datachecker.checks_loaders_and_exporters.checks import convert_schema, validate_using_pandera
+from datachecker.data_checkers.pandas_validator import DataValidator
 
 
 def test_convert_schema():

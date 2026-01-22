@@ -5,7 +5,9 @@ import tempfile
 import pandas as pd
 import pytest
 
-from datachecker.main import DataValidator, PolarsValidator, check_and_export
+from datachecker.data_checkers.pandas_validator import DataValidator
+from datachecker.data_checkers.polars_validator import PolarsValidator
+from datachecker.main import check_and_export
 
 data = {"id": [1, 2, 3], "name": ["Alice", "Bob", "Charlie"], "age": [25, 30, 35]}
 mock_df = pd.DataFrame(data)

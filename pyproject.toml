@@ -26,6 +26,7 @@ where = ["."]
 include = [
     "datachecker",
     "datachecker.checks_loaders_and_exporters",
+    "datachecker.data_checkers"
 ]
 
 [tool.bumpversion]
