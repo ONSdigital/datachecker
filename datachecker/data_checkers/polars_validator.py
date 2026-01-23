@@ -26,81 +26,9 @@ class PolarsValidator(Validator):
         ):
             check()
         # Formatting to convert pandera descriptions to more readable format
-        self._format_log_descriptions()
-        self._convert_frame_wide_check_to_single_entry()
+        super()._format_log_descriptions()
+        super()._convert_frame_wide_check_to_single_entry()
         return self
-
-    def _validate_schema(self, schema):
-        schema = super()._validate_schema(schema)
-        # Additional checks specific to DataValidator
-        df_columns = set(self.data.columns)
-        schema_keys = set(schema["columns"].keys())
-        # if not df_columns.issubset(schema_keys):
-        missing = df_columns - schema_keys
-        self._add_qa_entry(
-            description="Dataframe columns missing from schema",
-            failing_ids=list(missing),
-            outcome=not missing,
-            entry_type="error",
-        )
-        # if not schema_keys.issubset(df_columns):
-        extra = schema_keys - df_columns
-        self._add_qa_entry(
-            description="Schema keys not in dataframe",
-            failing_ids=list(extra),
-            outcome=not extra,
-            entry_type="warning",
-        )
-
-        # Only mandatory entry inside columns is "allow_na"
-        for col, item in schema["columns"].items():
-            item_keys = list(item.keys())
-            required_keys = ["type", "allow_na", "optional"]
-            if not all(key in item_keys for key in required_keys):
-                # missing_key_values = True
-                self._add_qa_entry(
-                    description=(
-                        f"Missing required properties in schema for column '{col}': "
-                        f"{[key for key in required_keys if key not in item_keys]}"
-                    ),
-                    failing_ids=[col],
-                    outcome=False,
-                    entry_type="error",
-                )
-
-        self._check_unused_schema_arguments(schema)
-        return schema
-
-    def _check_unused_schema_arguments(self, schema):
-        # Unused arguments in schema.
-        valid_schema_keys = {
-            "type",
-            "min_val",
-            "max_val",
-            "min_length",
-            "max_length",
-            "allowed_strings",
-            "forbidden_strings",
-            "allow_na",
-            "optional",
-            "min_decimal",
-            "max_decimal",
-            "max_date",
-            "min_date",
-            "max_datetime",
-            "min_datetime",
-        }
-        unpacked_keys = []
-        for _col, item in schema["columns"].items():
-            unpacked_keys.extend(item.keys())
-        unpacked_keys = set(unpacked_keys)
-        unused_keys = unpacked_keys.difference(valid_schema_keys)
-        self._add_qa_entry(
-            description="Checking for unused arguments in schema",
-            failing_ids=list(unused_keys),
-            outcome=not unused_keys,
-            entry_type="warning",
-        )
 
     def _check_duplicates(self):
         # Check for duplicate rows in the dataframe

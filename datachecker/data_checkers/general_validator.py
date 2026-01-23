@@ -15,7 +15,88 @@ from datachecker.checks_loaders_and_exporters.schema_loader import SchemaLoader
 from datachecker.checks_loaders_and_exporters.validator_exporter import Exporter
 
 
-class Validator:
+class SetupStructure:
+    """
+    Base class for setting up the structure of validation logs, including methods for
+    exporting, printing logs, and adding QA entries.
+
+    """
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        # Create a table header
+        sys_info = "\n".join([f"{key}: {value}" for key, value in self.log[0].items()])
+        headers = [
+            "Timestamp",
+            "Status",
+            "Description",
+            "Outcome",
+            "Failing IDs",
+            "Number Failing",
+        ]
+        header_row = " | ".join(headers)
+        separator = "-|-".join(["-" * len(h) for h in headers])
+        # Create table rows
+        rows = []
+        for entry in self.log[1:]:
+            row = [
+                entry.get("timestamp", ""),
+                entry.get("status", "").upper(),
+                entry.get("description", ""),
+                entry.get("outcome", ""),
+                ", ".join(map(str, entry.get("failing_ids", []))),
+                str(entry.get("number_failing", "")),
+            ]
+            rows.append(" | ".join(row))
+        log_entries = "\n".join([sys_info, "\n", header_row, separator] + rows)
+        return log_entries if log_entries else "No log entries."
+
+    def export(self):
+        Exporter.export(self.log, self.format, self.file)
+        self._hard_check_status()
+
+    def _create_log(self):
+        sys_info = {
+            "date": pd.Timestamp.now().strftime("%Y-%m-%d"),
+            "user": getpass.getuser(),
+            "device": platform.node(),
+            "device_platform": platform.platform(),
+            "architecture": platform.architecture()[0],
+            "python_version": platform.python_version(),
+            "pandas_version": pd.__version__,
+            "pandera_version": pandera.__version__,
+            "datachecker_version": version("datachecker"),
+        }
+        return [sys_info]
+
+    def _add_qa_entry(self, description, failing_ids, outcome, entry_type="info"):
+        outcome = "pass" if outcome else "fail"
+        if entry_type not in ["info", "error", "warning"]:
+            raise ValueError("entry_type must be 'info', 'error', or 'warning'.")
+        if failing_ids is not None:
+            n_failing = len(failing_ids)
+            if len(failing_ids) > 10:
+                failing_ids = failing_ids[:10] + ["..."]
+        else:
+            failing_ids = []
+            n_failing = 0
+        timestamp = pd.Timestamp.now().strftime("%H:%M:%S")
+
+        log_entry = {
+            "timestamp": timestamp,
+            "description": description,
+            "outcome": outcome,
+            "failing_ids": failing_ids,
+            "number_failing": n_failing,
+            "status": entry_type,
+        }
+
+        self.log.append(log_entry)
+
+
+class Validator(SetupStructure):
     """
     Validator class for validating data against a specified schema.
 
@@ -69,40 +150,18 @@ class Validator:
         self._validate_and_assign_custom_checks(custom_checks)
         self.schema = self._validate_schema(schema)
 
-    def __repr__(self):
-        return self.__str__()
-
-    def __str__(self):
-        # Create a table header
-        sys_info = "\n".join([f"{key}: {value}" for key, value in self.log[0].items()])
-        headers = [
-            "Timestamp",
-            "Status",
-            "Description",
-            "Outcome",
-            "Failing IDs",
-            "Number Failing",
-        ]
-        header_row = " | ".join(headers)
-        separator = "-|-".join(["-" * len(h) for h in headers])
-        # Create table rows
-        rows = []
-        for entry in self.log[1:]:
-            row = [
-                entry.get("timestamp", ""),
-                entry.get("status", "").upper(),
-                entry.get("description", ""),
-                entry.get("outcome", ""),
-                ", ".join(map(str, entry.get("failing_ids", []))),
-                str(entry.get("number_failing", "")),
-            ]
-            rows.append(" | ".join(row))
-        log_entries = "\n".join([sys_info, "\n", header_row, separator] + rows)
-        return log_entries if log_entries else "No log entries."
-
-    def export(self):
-        Exporter.export(self.log, self.format, self.file)
-        self._hard_check_status()
+    def validate(self):
+        for check in (
+            self._check_colnames,
+            self._check_column_contents,
+            self._check_duplicates,
+            self._check_completeness,
+        ):
+            check()
+        # Formatting to convert pandera descriptions to more readable format
+        self._format_log_descriptions()
+        self._convert_frame_wide_check_to_single_entry()
+        return self
 
     def _validate_and_assign_custom_checks(self, custom_checks):
         if custom_checks is not None:
@@ -112,44 +171,6 @@ class Validator:
                 if not callable(func):
                     raise TypeError(f"Custom check '{name}' is not callable.")
         self.custom_checks = custom_checks
-
-    def _create_log(self):
-        sys_info = {
-            "date": pd.Timestamp.now().strftime("%Y-%m-%d"),
-            "user": getpass.getuser(),
-            "device": platform.node(),
-            "device_platform": platform.platform(),
-            "architecture": platform.architecture()[0],
-            "python_version": platform.python_version(),
-            "pandas_version": pd.__version__,
-            "pandera_version": pandera.__version__,
-            "datachecker_version": version("datachecker"),
-        }
-        return [sys_info]
-
-    def _add_qa_entry(self, description, failing_ids, outcome, entry_type="info"):
-        outcome = "pass" if outcome else "fail"
-        if entry_type not in ["info", "error", "warning"]:
-            raise ValueError("entry_type must be 'info', 'error', or 'warning'.")
-        if failing_ids is not None:
-            n_failing = len(failing_ids)
-            if len(failing_ids) > 10:
-                failing_ids = failing_ids[:10] + ["..."]
-        else:
-            failing_ids = []
-            n_failing = 0
-        timestamp = pd.Timestamp.now().strftime("%H:%M:%S")
-
-        log_entry = {
-            "timestamp": timestamp,
-            "description": description,
-            "outcome": outcome,
-            "failing_ids": failing_ids,
-            "number_failing": n_failing,
-            "status": entry_type,
-        }
-
-        self.log.append(log_entry)
 
     def _validate_schema(self, schema):
         if not isinstance(schema, (str, dict)):
@@ -166,6 +187,43 @@ class Validator:
                 if "type" in props and props["type"] == "string":
                     props["type"] = "str"
 
+        # Additional checks specific to DataValidator
+        df_columns = set(self.data.columns)
+        schema_keys = set(schema["columns"].keys())
+        # if not df_columns.issubset(schema_keys):
+        missing = df_columns - schema_keys
+        self._add_qa_entry(
+            description="Dataframe columns missing from schema",
+            failing_ids=list(missing),
+            outcome=not missing,
+            entry_type="error",
+        )
+        # if not schema_keys.issubset(df_columns):
+        extra = schema_keys - df_columns
+        self._add_qa_entry(
+            description="Schema keys not in dataframe",
+            failing_ids=list(extra),
+            outcome=not extra,
+            entry_type="warning",
+        )
+
+        # Only mandatory entry inside columns is "allow_na"
+        for col, item in schema["columns"].items():
+            item_keys = list(item.keys())
+            required_keys = ["type", "allow_na", "optional"]
+            if not all(key in item_keys for key in required_keys):
+                # missing_key_values = True
+                self._add_qa_entry(
+                    description=(
+                        f"Missing required properties in schema for column '{col}': "
+                        f"{[key for key in required_keys if key not in item_keys]}"
+                    ),
+                    failing_ids=[col],
+                    outcome=False,
+                    entry_type="error",
+                )
+
+        self._check_unused_schema_arguments(schema)
         return schema
 
     def _hard_check_status(self):
@@ -343,3 +401,34 @@ class Validator:
                     outcome=not bool(invalid_ids),
                     entry_type="error",
                 )
+
+    def _check_unused_schema_arguments(self, schema):
+        # Unused arguments in schema.
+        valid_schema_keys = {
+            "type",
+            "min_val",
+            "max_val",
+            "min_length",
+            "max_length",
+            "allowed_strings",
+            "forbidden_strings",
+            "allow_na",
+            "optional",
+            "min_decimal",
+            "max_decimal",
+            "max_date",
+            "min_date",
+            "max_datetime",
+            "min_datetime",
+        }
+        unpacked_keys = []
+        for _col, item in schema["columns"].items():
+            unpacked_keys.extend(item.keys())
+        unpacked_keys = set(unpacked_keys)
+        unused_keys = unpacked_keys.difference(valid_schema_keys)
+        self._add_qa_entry(
+            description="Checking for unused arguments in schema",
+            failing_ids=list(unused_keys),
+            outcome=not unused_keys,
+            entry_type="warning",
+        )
