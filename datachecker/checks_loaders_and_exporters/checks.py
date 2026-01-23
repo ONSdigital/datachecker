@@ -138,13 +138,9 @@ def min_decimal(value: int, library=pa):
         A pandera check for the minimum decimal places.
     """
     return library.Check(
-        lambda s: s.apply(
-            lambda x: (
-                isinstance(x, float) and not pd.isnull(x) and len(str(x).split(".")[1]) >= value
-            )
-            if isinstance(x, float) and not pd.isnull(x)
-            else True
-        ),
+        lambda x: (isinstance(x, float) and not pd.isnull(x) and len(str(x).split(".")[1]) >= value)
+        if isinstance(x, float) and not pd.isnull(x)
+        else True,
         element_wise=False,
         error=f"has at least {value} decimal places",
     )
@@ -165,13 +161,9 @@ def max_decimal(value: int, library=pa):
         A pandera check for the maximum decimal places.
     """
     return library.Check(
-        lambda s: s.apply(
-            lambda x: (
-                isinstance(x, float) and not pd.isnull(x) and len(str(x).split(".")[1]) <= value
-            )
-            if isinstance(x, float) and not pd.isnull(x)
-            else True
-        ),
+        lambda x: (isinstance(x, float) and not pd.isnull(x) and len(str(x).split(".")[1]) <= value)
+        if isinstance(x, float) and not pd.isnull(x)
+        else True,
         element_wise=False,
         error=f"has at most {value} decimal places",
     )
@@ -335,6 +327,7 @@ def validate_using_pandera(
     except get_dtype_lib(data).errors.SchemaErrors as e:
         # validation_return is now a pandas dataframe
         validation_return = e.failure_cases[["column", "check", "failure_case", "index"]]
+        validation_return = dtype_check_and_convert(validation_return)
         # Group by 'column' and 'check', collect failure cases and indices for each group
         grouped_validation_return = (
             validation_return.groupby(["column", "check"])
@@ -357,7 +350,9 @@ def validate_using_pandera(
         col_order = col_order_passing + [
             col for col in col_order_failed if col not in col_order_passing
         ]
-        combined["column"] = pd.Categorical(combined["column"], categories=col_order, ordered=True)
+        combined["column"] = pd.Categorical(
+            combined.copy()["column"], categories=col_order, ordered=True
+        )
         combined = combined.sort_values("column").reset_index(drop=True)
     return combined
 
@@ -404,3 +399,9 @@ def convert_schema_into_log_entries(converted_schema: pa.DataFrameSchema) -> pd.
                 "invalid_ids": [[]] * len(list_of_checks),
             }
         )
+
+
+def dtype_check_and_convert(validation_return: pd.DataFrame | pl.DataFrame) -> pd.DataFrame:
+    if type(validation_return) is pl.DataFrame:
+        validation_return = validation_return.to_pandas()
+    return validation_return

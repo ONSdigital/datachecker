@@ -3,6 +3,7 @@ import re
 import tempfile
 
 import pandas as pd
+import polars as pl
 import pytest
 
 from datachecker.data_checkers.pandas_validator import DataValidator
@@ -182,8 +183,6 @@ class TestCheckAndExport:
 
 class TestPolarsValidaor:
     def test_polars_validator(self):
-        import polars as pl
-
         df = pl.DataFrame(
             {
                 "id": [1, 2, 3, 2],
@@ -204,6 +203,59 @@ class TestPolarsValidaor:
             },
         }
 
+        new_validator = PolarsValidator(
+            schema=schema, data=df, file="temp.html", format="html", hard_check=False
+        )
+        new_validator.validate()
+        new_validator.export()
+
+        assert isinstance(new_validator, PolarsValidator)
+        assert len(new_validator.log) > 0
+        assert os.path.exists("temp.html")
+
+        # Clean up
+        os.remove("temp.html")
+
+    def test_polars_all_dtypes(self):
+        df = pl.DataFrame(
+            {
+                "id": [1, 2, 3, 2],
+                "name": ["Alice", "Bob", "Charlie", "Bob"],
+                "score": [90.5, 82.0, 95.25, 82.0],
+                "passed": [True, True, True, True],
+            }
+        )
+
+        schema = {
+            "check_duplicates": True,
+            "check_completeness": True,
+            "columns": {
+                "id": {
+                    "type": "int",
+                    "allow_na": False,
+                    "max_val": 2,
+                    "min_val": 0,
+                    "optional": False,
+                },
+                "name": {
+                    "type": "str",
+                    "allow_na": False,
+                    "optional": False,
+                    "min_length": 4,
+                    "max_length": 10,
+                },
+                "score": {
+                    "type": "float",
+                    "allow_na": False,
+                    "min_val": 0,
+                    "max_val": 100,
+                    "max_decimal": 5,
+                    "min_decimal": 2,
+                    "optional": False,
+                },
+                "passed": {"type": "bool", "allow_na": False, "optional": False},
+            },
+        }
         new_validator = PolarsValidator(
             schema=schema, data=df, file="temp.html", format="html", hard_check=False
         )

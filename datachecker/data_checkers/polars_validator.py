@@ -17,19 +17,6 @@ class PolarsValidator(Validator):
     ):
         super().__init__(schema, data, file, format, hard_check, custom_checks)
 
-    def validate(self):
-        for check in (
-            super()._check_colnames,
-            super()._check_column_contents,
-            self._check_duplicates,
-            self._check_completeness,
-        ):
-            check()
-        # Formatting to convert pandera descriptions to more readable format
-        super()._format_log_descriptions()
-        super()._convert_frame_wide_check_to_single_entry()
-        return self
-
     def _check_duplicates(self):
         # Check for duplicate rows in the dataframe
         if self.schema.get("check_duplicates", False):
