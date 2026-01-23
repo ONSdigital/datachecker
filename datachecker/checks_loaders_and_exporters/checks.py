@@ -5,6 +5,25 @@ import polars as pl
 
 
 def get_dtype_lib(df) -> object:
+    """
+    loads the appropriate pandera library based on the dataframe type.
+    to support additional dataframe libraries, extend this function.
+
+    Parameters
+    ----------
+    df : pd.DataFrame | pl.DataFrame
+        The input dataframe.
+
+    Returns
+    -------
+    object
+        The corresponding pandera library.
+
+    Raises
+    ------
+    TypeError
+        If the dataframe type is unsupported.
+    """
     if type(df) is pd.DataFrame:
         return pa
 
@@ -13,6 +32,27 @@ def get_dtype_lib(df) -> object:
 
     else:
         raise TypeError("Unsupported DataFrame type")
+
+
+def dtype_check_and_convert(validation_return: pd.DataFrame | pl.DataFrame) -> pd.DataFrame:
+    """
+    converts the returned pandera dataframe to pandas. This is not converting the input
+    dataframe, only the validation return which we process using pandas.
+    To add support additional dataframe libraries, extend this function.
+
+    Parameters
+    ----------
+    validation_return : pd.DataFrame | pl.DataFrame
+        The validation return dataframe to convert.
+
+    Returns
+    -------
+    pd.DataFrame
+        The converted pandas dataframe.
+    """
+    if type(validation_return) is pl.DataFrame:
+        validation_return = validation_return.to_pandas()
+    return validation_return
 
 
 # Functions to create pandera checks based on schema column keys
@@ -399,9 +439,3 @@ def convert_schema_into_log_entries(converted_schema: pa.DataFrameSchema) -> pd.
                 "invalid_ids": [[]] * len(list_of_checks),
             }
         )
-
-
-def dtype_check_and_convert(validation_return: pd.DataFrame | pl.DataFrame) -> pd.DataFrame:
-    if type(validation_return) is pl.DataFrame:
-        validation_return = validation_return.to_pandas()
-    return validation_return
