@@ -1,6 +1,5 @@
-from itertools import product
-
 from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
 
 from datachecker.data_checkers.general_validator import Validator
 
@@ -20,24 +19,46 @@ class PySparkValidator(Validator):
     def _check_duplicates(self):
         # Check for duplicate rows in the dataframe
         if self.schema.get("check_duplicates", False):
-            duplicate_rows = self.data[self.data.duplicated(keep="first")]
-            duplicate_indices = duplicate_rows.index.tolist()
+            # Find duplicate rows (based on all columns)
+            dup_counts = self.data.groupBy(*self.data.columns).count().filter(F.col("count") > 1)
+
+            # Collect duplicate row identifiers (entire row as dicts)
+            duplicate_rows = [row.asDict() for row in dup_counts.drop("count").collect()]
+
             self._add_qa_entry(
                 description="Checking for duplicate rows in the dataframe",
-                failing_ids=duplicate_indices,
-                outcome=not duplicate_indices,
+                failing_ids=duplicate_rows,
+                outcome=not duplicate_rows,
                 entry_type="error",
             )
 
     def _check_completeness(self):
         if self.schema.get("check_completeness", False):
-            cols_to_check = self.schema.get("completeness_columns", self.data.columns.tolist())
-            # Generate all possible combinations of the column values
-            unique_values = [self.data[col].dropna().unique() for col in cols_to_check]
-            combinations = set(product(*unique_values))
-            existing_combinations = set(map(tuple, self.data[cols_to_check].dropna().values))
-            missing_combinations = combinations - existing_combinations
-            result = len(missing_combinations) == 0
+            cols_to_check = self.schema.get("completeness_columns", self.data.columns)
+
+            # Build the expected cartesian product of distinct (non-null) values per column
+            distinct_per_col = [
+                self.data.select(F.col(c)).where(F.col(c).isNotNull()).distinct()
+                for c in cols_to_check
+            ]
+
+            expected = distinct_per_col[0]
+            for df in distinct_per_col[1:]:
+                expected = expected.crossJoin(df)
+
+            # Build the set of existing (non-null) combinations
+            existing = (
+                self.data.select(*[F.col(c) for c in cols_to_check])
+                .where(F.concat_ws("||", *[F.col(c) for c in cols_to_check]).isNotNull())
+                .dropna()
+                .distinct()
+            )
+
+            # Missing combinations are expected minus existing
+            missing_combinations = expected.subtract(existing)
+
+            # True if no missing combinations exist
+            result = missing_combinations.limit(1).count() == 0
             if len(cols_to_check) > 4:
                 cols_to_check = cols_to_check[:4] + ["..."]
             formatted_cols_to_check = ", ".join(cols_to_check)
