@@ -17,8 +17,6 @@ dependencies = [
     "tomli",
     "jinja2",
     "pandera[pandas]>=0.26.1",
-    "polars", 
-    "pyarrow",
 ]
 
 [tool.setuptools.packages.find]
@@ -64,6 +62,15 @@ docs = [
     "mkdocs-git-revision-date-localized-plugin",
     "mkdocs-jupyter",
     "mkdocs-mermaid2-plugin"
+]
+polars = [
+    "polars",
+    "pandera[polars]",
+    "pyarrow"
+]
+pyspark = [
+    "pyspark",
+    "pandera[pyspark]"
 ]
 
 [tool.setuptools]
