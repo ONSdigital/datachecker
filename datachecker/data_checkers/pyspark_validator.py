@@ -1,4 +1,4 @@
-from pyspark.sql import SparkSession
+import pandas as pd
 from pyspark.sql import functions as F
 
 from datachecker.data_checkers.general_validator import Validator
@@ -14,6 +14,7 @@ class PySparkValidator(Validator):
         hard_check: bool = True,
         custom_checks: dict = None,
     ):
+        raise NotImplementedError("PySpark support is not implemented yet")
         super().__init__(schema, data, file, format, hard_check, custom_checks)
 
     def _check_duplicates(self):
@@ -72,26 +73,29 @@ class PySparkValidator(Validator):
 
 
 if __name__ == "__main__":
-    spark = SparkSession.builder.appName("DataValidator").getOrCreate()
-    # Example usage
-    data = spark.createDataFrame(
+    # Example usage (pandas)
+
+    data = pd.DataFrame(
         [
             (1, "A"),
             (2, "B"),
             (1, "A"),  # Duplicate row
             (3, "C"),
         ],
-        ["id", "value"],
+        columns=["id", "value"],
     )
 
     schema = {
         "check_duplicates": True,
         "check_completeness": True,
         "completeness_columns": ["id", "value"],
+        "columns": {
+            "id": {"type": "integer", "check_duplicates": True},
+            "value": {"type": "string", "check_duplicates": True},
+        },
     }
 
     validator = PySparkValidator(schema, data, "datafile.csv", "csv")
     validator.run_checks()
     for entry in validator.qa_report:
         print(entry)
-    spark.stop()

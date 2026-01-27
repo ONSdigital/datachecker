@@ -48,12 +48,13 @@ commit_args = "--no-verify"
 [project.optional-dependencies]
 dev = [
     "coverage",
-    "myst-parser",
     "pytest",
-    "python-dotenv",
     "toml",
     "bump_my_version",
-    "pre-commit"
+    "pre-commit",
+    "polars",
+    "pandera[polars]",
+    "pyarrow"
 ]
 docs = [
     "mkdocs",
@@ -69,7 +70,6 @@ polars = [
     "pyarrow"
 ]
 pyspark = [
-    "pyspark",
     "pandera[pyspark]"
 ]
 
