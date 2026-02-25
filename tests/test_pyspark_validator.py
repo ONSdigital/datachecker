@@ -10,13 +10,12 @@ class TestPysparkValidator:
         importlib.util.find_spec("pyspark") is None,
         reason="pyspark is not installed",
     )
-    def setup_method(self):
+    def test_pyspark_validator(self):
         from pyspark.sql import SparkSession
 
-        self.spark = SparkSession.builder.master("local[1]").appName("Test").getOrCreate()
-
-    def test_pyspark_validator(self):
         from datachecker.data_checkers.pyspark_validator import PySparkValidator
+
+        self.spark = SparkSession.builder.master("local[1]").appName("Test").getOrCreate()
 
         df = pd.DataFrame(
             {
