@@ -1,0 +1,53 @@
+import importlib.util
+import os
+
+import pandas as pd
+import pytest
+
+from datachecker.data_checkers.pyspark_validator import PySparkValidator
+
+
+class TestPysparkValidator:
+    @pytest.mark.skipif(
+        importlib.util.find_spec("pyspark") is None,
+        reason="pyspark is not installed",
+    )
+    def setup_method(self):
+        from pyspark.sql import SparkSession
+
+        self.spark = SparkSession.builder.master("local[1]").appName("Test").getOrCreate()
+
+    def test_pyspark_validator(self):
+        df = pd.DataFrame(
+            {
+                "id": [1, 2, 3, 2],
+                "name": ["Alice", "Bob", "Charlie", "Bob"],
+                "score": [90.5, 82.0, 95.25, 82.0],
+                "passed": [True, True, True, True],
+            }
+        )
+        spark_df = self.spark.createDataFrame(df)
+
+        schema = {
+            "check_duplicates": True,
+            "check_completeness": True,
+            "columns": {
+                "id": {"type": "int", "nullable": False},
+                "name": {"type": "str", "nullable": False},
+                "score": {"type": "float", "nullable": False, "min": 0, "max": 100},
+                "passed": {"type": "bool", "nullable": False},
+            },
+        }
+
+        new_validator = PySparkValidator(
+            schema=schema, data=spark_df, file="temp.html", format="html", hard_check=False
+        )
+        new_validator.validate()
+        new_validator.export()
+
+        assert isinstance(new_validator, PySparkValidator)
+        assert len(new_validator.log) > 0
+        assert os.path.exists("temp.html")
+
+        # Clean up
+        os.remove("temp.html")
