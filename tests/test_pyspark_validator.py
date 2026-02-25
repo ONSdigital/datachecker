@@ -63,6 +63,7 @@ class TestPysparkValidator:
                 "passed": [True, True, True, True],
             }
         )
+        spark_df = self.spark.createDataFrame(df)
 
         schema = {
             "check_duplicates": True,
@@ -95,7 +96,7 @@ class TestPysparkValidator:
             },
         }
         new_validator = PySparkValidator(
-            schema=schema, data=df, file="temp.html", format="html", hard_check=False
+            schema=schema, data=spark_df, file="temp.html", format="html", hard_check=False
         )
         new_validator.validate()
         new_validator.export()
