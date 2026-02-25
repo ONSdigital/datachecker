@@ -13,7 +13,7 @@ classifiers = [
 ]
 dependencies = [
     "pyyaml",
-    "pandas",
+    "pandas<3.0.0",
     "tomli",
     "jinja2",
     "pandera[pandas]>=0.26.1",
