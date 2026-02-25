@@ -1,40 +1,34 @@
 import pandas as pd
 import pandera.pandas as pa
-import pandera.polars as pap
-import polars as pl
 
 
-def get_dtype_lib(df) -> object:
-    """
-    loads the appropriate pandera library based on the dataframe type.
-    to support additional dataframe libraries, extend this function.
+def _type_id(obj) -> tuple[str, str]:
+    t = type(obj)
+    return (t.__module__, t.__name__)
 
-    Parameters
-    ----------
-    df : pd.DataFrame | pl.DataFrame
-        The input dataframe.
 
-    Returns
-    -------
-    object
-        The corresponding pandera library.
+def get_dtype_lib(df):
+    mod, name = _type_id(df)
 
-    Raises
-    ------
-    TypeError
-        If the dataframe type is unsupported.
-    """
-    if type(df) is pd.DataFrame:
+    if (mod, name) == ("pandas.core.frame", "DataFrame"):
+        import pandera.pandas as pa
+
         return pa
 
-    elif type(df) is pl.DataFrame:
+    if (mod, name) == ("polars.dataframe.frame", "DataFrame"):
+        import pandera.polars as pap
+
         return pap
 
-    else:
-        raise TypeError("Unsupported DataFrame type")
+    if (mod, name) == ("pyspark.sql.dataframe", "DataFrame"):
+        import pandera.pyspark as paspk
+
+        return paspk
+
+    raise TypeError(f"Unsupported DataFrame type: {mod}.{name}")
 
 
-def dtype_check_and_convert(validation_return: pd.DataFrame | pl.DataFrame) -> pd.DataFrame:
+def dtype_check_and_convert(validation_return) -> pd.DataFrame:
     """
     converts the returned pandera dataframe to pandas. This is not converting the input
     dataframe, only the validation return which we process using pandas.
@@ -50,7 +44,7 @@ def dtype_check_and_convert(validation_return: pd.DataFrame | pl.DataFrame) -> p
     pd.DataFrame
         The converted pandas dataframe.
     """
-    if type(validation_return) is pl.DataFrame:
+    if type(validation_return) is not pd.DataFrame:
         validation_return = validation_return.to_pandas()
     return validation_return
 
@@ -256,9 +250,7 @@ def format_custom_checks(custom_checks: dict, library=pa) -> list:
     return formatted_checks
 
 
-def convert_schema(
-    schema: dict, df: pd.DataFrame | pl.DataFrame, custom_checks: dict = None
-) -> pa.DataFrameSchema:
+def convert_schema(schema: dict, df, custom_checks: dict = None) -> pa.DataFrameSchema:
     """
     Convert the loaded schema to a pandera DataFrameSchema. Uses simple defined
     functions to map schema keys to pandera checks. To add further checks, define
