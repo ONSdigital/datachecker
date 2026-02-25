@@ -13,12 +13,10 @@ classifiers = [
 ]
 dependencies = [
     "pyyaml",
-    "pandas",
+    "pandas<3.0.0",
     "tomli",
     "jinja2",
     "pandera[pandas]>=0.26.1",
-    "polars", 
-    "pyarrow",
 ]
 
 [tool.setuptools.packages.find]
@@ -26,6 +24,7 @@ where = ["."]
 include = [
     "datachecker",
     "datachecker.checks_loaders_and_exporters",
+    "datachecker.data_checkers"
 ]
 
 [tool.bumpversion]
@@ -49,12 +48,13 @@ commit_args = "--no-verify"
 [project.optional-dependencies]
 dev = [
     "coverage",
-    "myst-parser",
     "pytest",
-    "python-dotenv",
     "toml",
     "bump_my_version",
-    "pre-commit"
+    "pre-commit",
+    "polars",
+    "pandera[polars]",
+    "pyarrow"
 ]
 docs = [
     "mkdocs",
@@ -63,6 +63,14 @@ docs = [
     "mkdocs-git-revision-date-localized-plugin",
     "mkdocs-jupyter",
     "mkdocs-mermaid2-plugin"
+]
+polars = [
+    "polars",
+    "pandera[polars]",
+    "pyarrow"
+]
+pyspark = [
+    "pandera[pyspark]"
 ]
 
 [tool.setuptools]

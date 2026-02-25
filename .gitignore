@@ -891,3 +891,4 @@ docs/_linkcheck/
 *.xlsx
 
 produced_logs/*
+playground/*
