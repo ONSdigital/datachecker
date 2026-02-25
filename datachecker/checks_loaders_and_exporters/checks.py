@@ -20,7 +20,10 @@ def get_dtype_lib(df):
 
         return pap
 
-    if (mod, name) == ("pyspark.sql.dataframe", "DataFrame"):
+    if (mod, name) == ("pyspark.sql.dataframe", "DataFrame") or (mod, name) == (
+        "pyspark.sql.classic.dataframe",
+        "DataFrame",
+    ):
         import pandera.pyspark as paspk
 
         return paspk
