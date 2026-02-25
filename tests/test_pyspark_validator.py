@@ -4,8 +4,6 @@ import os
 import pandas as pd
 import pytest
 
-from datachecker.data_checkers.pyspark_validator import PySparkValidator
-
 
 class TestPysparkValidator:
     @pytest.mark.skipif(
@@ -18,6 +16,8 @@ class TestPysparkValidator:
         self.spark = SparkSession.builder.master("local[1]").appName("Test").getOrCreate()
 
     def test_pyspark_validator(self):
+        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+
         df = pd.DataFrame(
             {
                 "id": [1, 2, 3, 2],
