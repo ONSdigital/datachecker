@@ -17,6 +17,9 @@ class PySparkValidator(Validator):
     ):
         # raise NotImplementedError("PySpark support is not implemented yet")
         super().__init__(schema, data, file, format, hard_check, custom_checks)
+        # self._convert_dtypes()
+
+    # def _convert_
 
     def _check_duplicates(self):
         # Check for duplicate rows in the dataframe

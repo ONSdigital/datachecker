@@ -355,10 +355,11 @@ def validate_using_pandera(
     # ISSUE - NA pass not present in output log
 
     try:
-        converted_schema.validate(data, lazy=True)
+        df_output = converted_schema.validate(data, lazy=True)
 
-        # The following code is to add all checks when validation passes
-        grouped_validation_return = None
+        # The following code is to add all checks when validation passes or pyspark
+        # validation
+        grouped_validation_return = process_pyspark_errors(df_output)
     except get_dtype_lib(data).errors.SchemaErrors as e:
         # validation_return is now a pandas dataframe
         validation_return = e.failure_cases[["column", "check", "failure_case", "index"]]
@@ -434,3 +435,29 @@ def convert_schema_into_log_entries(converted_schema: pa.DataFrameSchema) -> pd.
                 "invalid_ids": [[]] * len(list_of_checks),
             }
         )
+
+
+def process_pyspark_errors(df_output):
+    if "pyspark" not in str(type(df_output)):
+        return None
+    failed_cases = pd.DataFrame({})
+    for _key in df_output.pandera.errors:
+        for check_name in df_output.pandera.errors[_key]:
+            failed_cases = pd.concat(
+                [failed_cases, pd.DataFrame(df_output.pandera.errors[_key][check_name])],
+                ignore_index=True,
+            )
+
+    # failed_cases = pd.DataFrame(df_output.pandera.errors["DATA"]["DATAFRAME_CHECK"])
+    validation_return = pd.DataFrame({})
+    validation_return["column"] = failed_cases["column"]
+    validation_return["check"] = failed_cases["check"]
+    validation_return["failure_case"] = failed_cases["error"]
+    validation_return["index"] = None
+    grouped_validation_return = (
+        validation_return.groupby(["column", "check"])
+        .agg({"failure_case": list, "index": list})
+        .reset_index()
+        .rename(columns={"index": "invalid_ids"})
+    )
+    return grouped_validation_return

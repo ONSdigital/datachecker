@@ -53,6 +53,8 @@ class TestPysparkValidator:
         os.remove("temp.html")
 
     def test_pyspark_all_dtypes(self):
+        import pyspark.sql.types as T
+
         from datachecker.data_checkers.pyspark_validator import PySparkValidator
 
         df = pd.DataFrame(
@@ -64,27 +66,31 @@ class TestPysparkValidator:
             }
         )
         spark_df = self.spark.createDataFrame(df)
+        spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
+        spark_df = spark_df.withColumn("name", spark_df["name"].cast(T.StringType()))
+        spark_df = spark_df.withColumn("score", spark_df["score"].cast(T.FloatType()))
+        spark_df = spark_df.withColumn("passed", spark_df["passed"].cast(T.BooleanType()))
 
         schema = {
             "check_duplicates": True,
             "check_completeness": True,
             "columns": {
                 "id": {
-                    "type": "int",
+                    "type": T.IntegerType(),
                     "allow_na": False,
                     "max_val": 2,
                     "min_val": 0,
                     "optional": False,
                 },
                 "name": {
-                    "type": "str",
+                    "type": T.StringType(),
                     "allow_na": False,
                     "optional": False,
                     "min_length": 4,
                     "max_length": 10,
                 },
                 "score": {
-                    "type": "float",
+                    "type": T.FloatType(),
                     "allow_na": False,
                     "min_val": 0,
                     "max_val": 100,
@@ -92,7 +98,7 @@ class TestPysparkValidator:
                     "min_decimal": 2,
                     "optional": False,
                 },
-                "passed": {"type": "bool", "allow_na": False, "optional": False},
+                "passed": {"type": T.BooleanType(), "allow_na": False, "optional": False},
             },
         }
         new_validator = PySparkValidator(
