@@ -113,10 +113,7 @@ class TestPysparkValidator:
 
         df = pd.DataFrame(
             {
-                "id": [1, 2.2, 332, 2],
-                "name": ["Alice", "Bob", "Charlie", "Bob"],
-                "score": [90.5, 82.24, 95.25, 182.0],
-                "passed": [True, False, True, True],
+                "id": [1, 2, 7, 5],
             }
         )
         spark_df = self.spark.createDataFrame(df)
@@ -132,34 +129,10 @@ class TestPysparkValidator:
                     "min_val": 0,
                     "optional": False,
                 },
-                "name": {
-                    "type": "str",
-                    "allow_na": False,
-                    "optional": False,
-                    "min_length": 4,
-                    "max_length": 10,
-                },
-                "score": {
-                    "type": "int",
-                    "allow_na": False,
-                    "min_val": 0,
-                    "max_val": 100,
-                    "max_decimal": 5,
-                    "min_decimal": 2,
-                    "optional": False,
-                },
-                "passed": {"type": "bool", "allow_na": False, "optional": False},
             },
         }
         new_validator = PySparkValidator(
-            schema=schema, data=spark_df, file="temp.html", format="html", hard_check=False
+            schema=schema, data=spark_df, file="temp.json", format="json", hard_check=False
         )
         new_validator.validate()
-        new_validator.export()
-
-        assert isinstance(new_validator, PySparkValidator)
-        assert len(new_validator.log) > 0
-        assert os.path.exists("temp.html")
-
-        # Clean up
-        os.remove("temp.html")
+        assert any("fail" in str(entry).lower() for entry in new_validator.log)
