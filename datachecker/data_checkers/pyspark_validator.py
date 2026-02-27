@@ -1,4 +1,5 @@
 import pandas as pd
+import pyspark.sql.types as T
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
@@ -17,9 +18,27 @@ class PySparkValidator(Validator):
     ):
         # raise NotImplementedError("PySpark support is not implemented yet")
         super().__init__(schema, data, file, format, hard_check, custom_checks)
-        # self._convert_dtypes()
+        self._convert_schema_dtypes()
 
-    # def _convert_
+    def _convert_schema_dtypes(self):
+        mapping_dtypes = {
+            "int": T.IntegerType(),
+            "float": T.FloatType(),
+            "string": T.StringType(),
+            "str": T.StringType(),
+            "bool": T.BooleanType(),
+        }
+        print(mapping_dtypes)
+        for col in self.schema.get("columns", {}):
+            input_type = self.schema["columns"][col].get("type")
+            if input_type not in mapping_dtypes and input_type not in mapping_dtypes.values():
+                raise ValueError(
+                    f"Unsupported data type '{input_type}' for column '{col}' in schema. "
+                    f"Supported types are: {list(mapping_dtypes.keys())}"
+                )
+            self.schema["columns"][col]["type"] = mapping_dtypes.get(
+                self.schema["columns"][col]["type"], self.schema["columns"][col]["type"]
+            )
 
     def _check_duplicates(self):
         # Check for duplicate rows in the dataframe

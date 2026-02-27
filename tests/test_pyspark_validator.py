@@ -33,7 +33,7 @@ class TestPysparkValidator:
             "check_completeness": True,
             "columns": {
                 "id": {"type": "int", "nullable": False},
-                "name": {"type": "str", "nullable": False},
+                "name": {"type": "string", "nullable": False},
                 "score": {"type": "float", "nullable": False, "min": 0, "max": 100},
                 "passed": {"type": "bool", "nullable": False},
             },
