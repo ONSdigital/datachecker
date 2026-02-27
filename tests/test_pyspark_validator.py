@@ -16,6 +16,8 @@ class TestPysparkValidator:
         self.spark = SparkSession.builder.master("local[1]").appName("Test").getOrCreate()
 
     def test_pyspark_validator(self):
+        import pyspark.sql.types as T
+
         from datachecker.data_checkers.pyspark_validator import PySparkValidator
 
         df = pd.DataFrame(
@@ -27,6 +29,10 @@ class TestPysparkValidator:
             }
         )
         spark_df = self.spark.createDataFrame(df)
+        spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
+        spark_df = spark_df.withColumn("name", spark_df["name"].cast(T.StringType()))
+        spark_df = spark_df.withColumn("score", spark_df["score"].cast(T.FloatType()))
+        spark_df = spark_df.withColumn("passed", spark_df["passed"].cast(T.BooleanType()))
 
         schema = {
             "check_duplicates": True,
@@ -34,7 +40,7 @@ class TestPysparkValidator:
             "columns": {
                 "id": {"type": "int", "nullable": False},
                 "name": {"type": "string", "nullable": False},
-                "score": {"type": "float", "nullable": False, "min": 0, "max": 100},
+                "score": {"type": "float", "nullable": False},
                 "passed": {"type": "bool", "nullable": False},
             },
         }
@@ -115,6 +121,8 @@ class TestPysparkValidator:
         os.remove("temp.html")
 
     def test_pyspark_validate_boilerplate_checks(self):
+        import pyspark.sql.types as T
+
         from datachecker.data_checkers.pyspark_validator import PySparkValidator
 
         df = pd.DataFrame(
@@ -123,6 +131,7 @@ class TestPysparkValidator:
             }
         )
         spark_df = self.spark.createDataFrame(df)
+        spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
 
         schema = {
             "check_duplicates": False,
@@ -141,4 +150,10 @@ class TestPysparkValidator:
             schema=schema, data=spark_df, file="temp.json", format="json", hard_check=False
         )
         new_validator.validate()
-        assert any("fail" in str(entry).lower() for entry in new_validator.log)
+        entries_with_fails = [
+            entry for entry in new_validator.log[1:-1] if "fail" in str(entry["outcome"]).lower()
+        ]
+        assert len(entries_with_fails) == 1
+        assert "Pyspark does not return cases or index" in str(
+            entries_with_fails[0]["failing_ids"][0]
+        )

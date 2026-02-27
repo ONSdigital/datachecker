@@ -30,7 +30,6 @@ class PySparkValidator(Validator):
         message = "Pyspark does not return cases or index"
         for i in range(1, len(self.log) - 1):
             entry = self.log[i]
-            print(i)
             if (
                 entry["failing_ids"] is None
                 or len(entry["failing_ids"]) == 0
