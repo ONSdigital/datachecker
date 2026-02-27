@@ -1,8 +1,6 @@
 import re
 
-import pandas as pd
 import pyspark.sql.types as T
-from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
 from datachecker.data_checkers.general_validator import Validator
@@ -117,34 +115,3 @@ class PySparkValidator(Validator):
                 outcome=result,
                 entry_type="error",
             )
-
-
-if __name__ == "__main__":
-    # Example usage (pandas)
-
-    spark = SparkSession.builder.master("local[2]").appName("create-DFs").getOrCreate()
-
-    data = pd.DataFrame(
-        [
-            (1, "A"),
-            (2.1, "B"),
-            (1, "A"),  # Duplicate row
-            (3, "C"),
-        ],
-        columns=["id", "value"],
-    )
-    data_spark = spark.createDataFrame(data)
-
-    schema = {
-        "check_duplicates": True,
-        "check_completeness": True,
-        "completeness_columns": ["id", "value"],
-        "columns": {
-            "id": {"type": "int", "check_duplicates": True},
-            "value": {"type": "string", "check_duplicates": True},
-        },
-    }
-
-    validator = PySparkValidator(schema, data_spark, "datafile.csv", "csv")
-    validator.validate()
-    print(validator)
