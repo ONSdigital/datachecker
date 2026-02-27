@@ -440,6 +440,9 @@ def convert_schema_into_log_entries(converted_schema: pa.DataFrameSchema) -> pd.
 def process_pyspark_errors(df_output):
     if "pyspark" not in str(type(df_output)):
         return None
+    elif df_output.pandera.errors is None or df_output.pandera.errors == {}:
+        # No failed validation checks
+        return None
     failed_cases = pd.DataFrame({})
     for _key in df_output.pandera.errors:
         for check_name in df_output.pandera.errors[_key]:
