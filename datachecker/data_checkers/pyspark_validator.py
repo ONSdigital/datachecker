@@ -1,4 +1,5 @@
 import re
+import warnings
 
 import pyspark.sql.types as T
 from pyspark.sql import functions as F
@@ -16,7 +17,12 @@ class PySparkValidator(Validator):
         hard_check: bool = True,
         custom_checks: dict = None,
     ):
-        # raise NotImplementedError("PySpark support is not implemented yet")
+        warnings.warn(
+            "PySparkValidator is in early stages of development. "
+            "Please open issues on GitHub if you encounter any strange or broken behaviour",
+            UserWarning,
+            stacklevel=2,
+        )
         super().__init__(schema, data, file, format, hard_check, custom_checks)
         self._convert_schema_dtypes()
 
