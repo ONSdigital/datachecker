@@ -1,8 +1,12 @@
 import importlib.util
 import os
 
+import findspark
 import pandas as pd
 import pytest
+
+# This helps for running local Spark sessions
+findspark.init()
 
 
 @pytest.mark.skipif(
@@ -13,7 +17,7 @@ class TestPysparkValidator:
     def setup_method(self):
         from pyspark.sql import SparkSession
 
-        self.spark = SparkSession.builder.master("local[1]").appName("Test").getOrCreate()
+        self.spark = SparkSession.builder.master("local").appName("Test").getOrCreate()
 
     def test_pyspark_validator(self):
         import pyspark.sql.types as T
