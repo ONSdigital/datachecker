@@ -49,8 +49,10 @@ class PySparkValidator(Validator):
             "string": T.StringType(),
             "str": T.StringType(),
             "bool": T.BooleanType(),
+            "date": T.DateType(),
+            "datetime": T.DateType(),
+            "timestamp": T.TimestampType(),
         }
-        print(mapping_dtypes)
         for col in self.schema.get("columns", {}):
             input_type = self.schema["columns"][col].get("type")
             if input_type not in mapping_dtypes and input_type not in mapping_dtypes.values():
