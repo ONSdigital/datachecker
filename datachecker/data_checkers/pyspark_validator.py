@@ -1,4 +1,6 @@
-import pandas as pd
+import re
+
+import pyspark.sql.types as T
 from pyspark.sql import functions as F
 
 from datachecker.data_checkers.general_validator import Validator
@@ -15,6 +17,51 @@ class PySparkValidator(Validator):
         custom_checks: dict = None,
     ):
         super().__init__(schema, data, file, format, hard_check, custom_checks)
+        self._convert_schema_dtypes()
+
+    def validate(self):
+        super().validate()
+        self._convert_pyspark_error_messages()
+
+    def _convert_pyspark_error_messages(self):
+        message = "Pyspark does not return cases or index"
+        for i in range(1, len(self.log) - 1):
+            entry = self.log[i]
+            if (
+                entry["failing_ids"] is None
+                or len(entry["failing_ids"]) == 0
+                or not isinstance(entry["failing_ids"][0], str)
+            ):
+                continue
+            # <Schema Column ...> is the message when a check fails for pyspark
+            # replace it with blanket statement. Should still pass other important errors
+            # back to user if they are not related to pyspark checks
+            elif re.search(r"<Schema Column", entry["failing_ids"][0]) is not None:
+                entry["failing_ids"][0] = message
+            else:
+                continue
+
+    def _convert_schema_dtypes(self):
+        mapping_dtypes = {
+            "int": T.IntegerType(),
+            "float": T.FloatType(),
+            "string": T.StringType(),
+            "str": T.StringType(),
+            "bool": T.BooleanType(),
+            "date": T.DateType(),
+            "datetime": T.DateType(),
+            "timestamp": T.TimestampType(),
+        }
+        for col in self.schema.get("columns", {}):
+            input_type = self.schema["columns"][col].get("type")
+            if input_type not in mapping_dtypes and input_type not in mapping_dtypes.values():
+                raise ValueError(
+                    f"Unsupported data type '{input_type}' for column '{col}' in schema. "
+                    f"Supported types are: {list(mapping_dtypes.keys())}"
+                )
+            self.schema["columns"][col]["type"] = mapping_dtypes.get(
+                self.schema["columns"][col]["type"], self.schema["columns"][col]["type"]
+            )
 
     def _check_duplicates(self):
         # Check for duplicate rows in the dataframe
@@ -69,32 +116,3 @@ class PySparkValidator(Validator):
                 outcome=result,
                 entry_type="error",
             )
-
-
-if __name__ == "__main__":
-    # Example usage (pandas)
-
-    data = pd.DataFrame(
-        [
-            (1, "A"),
-            (2, "B"),
-            (1, "A"),  # Duplicate row
-            (3, "C"),
-        ],
-        columns=["id", "value"],
-    )
-
-    schema = {
-        "check_duplicates": True,
-        "check_completeness": True,
-        "completeness_columns": ["id", "value"],
-        "columns": {
-            "id": {"type": "integer", "check_duplicates": True},
-            "value": {"type": "string", "check_duplicates": True},
-        },
-    }
-
-    validator = PySparkValidator(schema, data, "datafile.csv", "csv")
-    validator.run_checks()
-    for entry in validator.qa_report:
-        print(entry)
