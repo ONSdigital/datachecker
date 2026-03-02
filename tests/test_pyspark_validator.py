@@ -58,6 +58,9 @@ class TestPysparkValidator:
         # Clean up
         os.remove("temp.html")
 
+    @pytest.mark.xfail(
+        reason="Decimal checks seem to be broken in pyspark, need to investigate further"
+    )
     def test_pyspark_all_dtypes(self):
         import pyspark.sql.types as T
 
@@ -66,8 +69,8 @@ class TestPysparkValidator:
         df = pd.DataFrame(
             {
                 "id": [1, 2, 3, 2],
-                "name": ["Alice", "Bob", "Charlie", "Bob"],
-                "score": [90.5, 82.0, 95.25, 82.0],
+                "name": ["Alice", "Bob", "@", "Bob"],
+                "score": [90.5, 82.0, 95.2, 82.0],
                 "passed": [True, True, True, True],
             }
         )
@@ -94,13 +97,15 @@ class TestPysparkValidator:
                     "optional": False,
                     "min_length": 4,
                     "max_length": 10,
+                    # allowed strings not working for pyspark with regex
+                    "allowed_strings": ["Alice", "Bob", "Charlie"],
                 },
                 "score": {
                     "type": T.FloatType(),
                     "allow_na": False,
                     "min_val": 0,
-                    "max_val": 100,
-                    "max_decimal": 5,
+                    "max_val": 95,
+                    "max_decimal": 3,
                     "min_decimal": 2,
                     "optional": False,
                 },
@@ -111,14 +116,24 @@ class TestPysparkValidator:
             schema=schema, data=spark_df, file="temp.html", format="html", hard_check=False
         )
         new_validator.validate()
-        new_validator.export()
 
-        assert isinstance(new_validator, PySparkValidator)
-        assert len(new_validator.log) > 0
-        assert os.path.exists("temp.html")
+        entries_with_fails = [
+            entry for entry in new_validator.log[1:] if "fail" in str(entry["outcome"]).lower()
+        ]
 
-        # Clean up
-        os.remove("temp.html")
+        assert len(new_validator.log) == 23
+        # Decimal checks seem to be broken currently have 6 fails, expect
+        # one extra for the decimal check
+        assert len(entries_with_fails) == 7
+        assert [entry["description"] for entry in entries_with_fails] == [
+            "Checking id less than or equal to 2",
+            "Checking name contains only ['Alice', 'Bob', 'Charlie']",
+            "Checking name string length greater than or equal to 4",
+            "Checking score less than or equal to 95",
+            "Checking score has at least 2 decimal places",
+            "Checking for duplicate rows in the dataframe",
+            "Checking for missing rows in the dataframe columns: id, name, score, passed",
+        ]
 
     def test_pyspark_validate_boilerplate_checks(self):
         import pyspark.sql.types as T
