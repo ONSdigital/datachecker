@@ -17,6 +17,9 @@ dependencies = [
     "tomli",
     "jinja2",
     "pandera>=0.26.1",
+    "pyspark",
+    "pyspark[connect]",
+    "pandera[pyspark]"
 ]
 
 [tool.setuptools.packages.find]
