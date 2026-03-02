@@ -166,9 +166,171 @@ class TestPysparkValidator:
         )
         new_validator.validate()
         entries_with_fails = [
-            entry for entry in new_validator.log[1:-1] if "fail" in str(entry["outcome"]).lower()
+            entry for entry in new_validator.log[1:] if "fail" in str(entry["outcome"]).lower()
         ]
         assert len(entries_with_fails) == 1
         assert "Pyspark does not return cases or index" in str(
             entries_with_fails[0]["failing_ids"][0]
         )
+
+    def test_pyspark_validate_check_duplicates_fail(self):
+        import pyspark.sql.types as T
+
+        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+
+        df = pd.DataFrame(
+            {
+                "id": [1, 2, 7, 5, 7],
+                "name": ["Alice", "Bob", "Charlie", "David", "Charlie"],
+                "score": [90.5, 82.0, 95.25, 88.0, 95.25],
+            }
+        )
+        spark_df = self.spark.createDataFrame(df)
+        spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
+        spark_df = spark_df.withColumn("name", spark_df["name"].cast(T.StringType()))
+        spark_df = spark_df.withColumn("score", spark_df["score"].cast(T.FloatType()))
+
+        schema = {
+            "check_duplicates": True,
+            "columns": {
+                "id": {
+                    "type": "int",
+                    "allow_na": False,
+                    "max_val": 10,
+                    "min_val": 0,
+                    "optional": False,
+                },
+                "name": {
+                    "type": "string",
+                    "allow_na": False,
+                    "optional": False,
+                    "min_length": 0,
+                    "max_length": 10,
+                },
+                "score": {
+                    "type": "float",
+                    "allow_na": False,
+                    "optional": False,
+                    "min_val": 0,
+                    "max_val": 100,
+                },
+            },
+        }
+        new_validator = PySparkValidator(
+            schema=schema, data=spark_df, file="temp.json", format="json", hard_check=False
+        )
+        new_validator.validate()
+        entries_with_fails = [
+            entry for entry in new_validator.log[1:] if "fail" in str(entry["outcome"]).lower()
+        ]
+        assert len(entries_with_fails) == 1
+        assert [entry["description"] for entry in entries_with_fails] == [
+            "Checking for duplicate rows in the dataframe"
+        ]
+
+    def test_pyspark_validate_check_duplicates_pass(self):
+        import pyspark.sql.types as T
+
+        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+
+        df = pd.DataFrame(
+            {
+                "id": [1, 2, 7, 5],
+                "name": ["Alice", "Bob", "Charlie", "David"],
+                "score": [90.5, 82.0, 95.25, 88.0],
+            }
+        )
+        spark_df = self.spark.createDataFrame(df)
+        spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
+        spark_df = spark_df.withColumn("name", spark_df["name"].cast(T.StringType()))
+        spark_df = spark_df.withColumn("score", spark_df["score"].cast(T.FloatType()))
+
+        schema = {
+            "check_duplicates": True,
+            "columns": {
+                "id": {
+                    "type": "int",
+                    "allow_na": False,
+                    "optional": False,
+                },
+                "name": {
+                    "type": "string",
+                    "allow_na": False,
+                    "optional": False,
+                },
+                "score": {
+                    "type": "float",
+                    "allow_na": False,
+                    "optional": False,
+                },
+            },
+        }
+        new_validator = PySparkValidator(
+            schema=schema, data=spark_df, file="temp.json", format="json", hard_check=False
+        )
+        new_validator.validate()
+        entries_with_fails = [
+            entry for entry in new_validator.log[1:] if "fail" in str(entry["outcome"]).lower()
+        ]
+        assert len(entries_with_fails) == 0
+
+    def test_pyspark_validate_check_completeness_pass(self):
+        import pyspark.sql.types as T
+
+        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+
+        df = pd.DataFrame({"id": [1, 2, 3, 4], "age": [10, 20, 10, 20], "sex": ["M", "M", "F", "F"]})
+        spark_df = self.spark.createDataFrame(df)
+        spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
+        spark_df = spark_df.withColumn("age", spark_df["age"].cast(T.IntegerType()))
+        spark_df = spark_df.withColumn("sex", spark_df["sex"].cast(T.StringType()))
+
+        schema = {
+            "check_completeness": True,
+            "completeness_columns": ["age", "sex"],
+            "columns": {
+                "id": {"type": "int", "allow_na": False},
+                "age": {"type": "int", "allow_na": False},
+                "sex": {"type": "string", "allow_na": False},
+            },
+        }
+
+        validator = PySparkValidator(schema=schema, data=spark_df, file=None, format=None)
+        validator._check_completeness()
+        completeness_entry = [
+            entry
+            for entry in validator.log[1:]
+            if "Checking for missing rows in the dataframe columns" in entry["description"]
+        ][0]
+        assert completeness_entry["outcome"] == "pass"
+
+    def test_pyspark_validate_check_completeness_fail(self):
+        import pyspark.sql.types as T
+
+        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+
+        df = pd.DataFrame({"id": [1, 2, 3, 4], "age": [10, 20, 10, 20], "sex": ["M", "M", "F", "F"]})
+        df_dropped_row = df.iloc[0:3]  # Remove one row to create incompleteness
+        spark_df = self.spark.createDataFrame(df_dropped_row)
+        spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
+        spark_df = spark_df.withColumn("age", spark_df["age"].cast(T.IntegerType()))
+        spark_df = spark_df.withColumn("sex", spark_df["sex"].cast(T.StringType()))
+
+        schema = {
+            "check_completeness": True,
+            "completeness_columns": ["age", "sex"],
+            "columns": {
+                "id": {"type": "int", "allow_na": False},
+                "age": {"type": "int", "allow_na": False},
+                "sex": {"type": "string", "allow_na": False},
+            },
+        }
+
+        validator = PySparkValidator(schema=schema, data=spark_df, file=None, format=None)
+        validator._check_completeness()
+        completeness_entry = [
+            entry
+            for entry in validator.log[1:]
+            if "Checking for missing rows in the dataframe columns" in entry["description"]
+        ][0]
+        assert completeness_entry["outcome"] == "fail"
