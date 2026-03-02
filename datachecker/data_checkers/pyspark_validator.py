@@ -14,7 +14,6 @@ class PySparkValidator(Validator):
         hard_check: bool = True,
         custom_checks: dict = None,
     ):
-        raise NotImplementedError("PySpark support is not implemented yet")
         super().__init__(schema, data, file, format, hard_check, custom_checks)
 
     def _check_duplicates(self):

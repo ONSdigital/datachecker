@@ -1,9 +1,11 @@
 import pandas as pd
 import polars as pl
+import pyspark.sql.dataframe as spark
 
 from datachecker.data_checkers.general_validator import Validator
 from datachecker.data_checkers.pandas_validator import DataValidator
 from datachecker.data_checkers.polars_validator import PolarsValidator
+from datachecker.data_checkers.pyspark_validator import PySparkValidator
 
 
 def check_and_export(schema, data, file, format, hard_check=True, custom_checks=None) -> Validator:
@@ -41,6 +43,15 @@ def check_and_export(schema, data, file, format, hard_check=True, custom_checks=
         )
     elif type(data) is pd.DataFrame:
         validator = DataValidator(
+            schema=schema,
+            data=data,
+            file=file,
+            format=format,
+            hard_check=hard_check,
+            custom_checks=custom_checks,
+        )
+    elif type(data) is spark.DataFrame:
+        validator = PySparkValidator(
             schema=schema,
             data=data,
             file=file,
