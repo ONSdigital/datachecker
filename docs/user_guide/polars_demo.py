@@ -1,6 +1,7 @@
-import polars
-from data_checkers import PolarsValidator
 import time
+
+import polars
+
 from datachecker import PolarsValidator, check_and_export
 
 tic = time.time()
