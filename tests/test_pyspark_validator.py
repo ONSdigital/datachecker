@@ -11,9 +11,13 @@ import pytest
 )
 class TestPysparkValidator:
     def setup_method(self):
+        import findspark
         from pyspark.sql import SparkSession
 
-        self.spark = SparkSession.builder.master("local[1]").appName("Test").getOrCreate()
+        # This helps for running local Spark sessions
+        findspark.init()
+
+        self.spark = SparkSession.builder.master("local").appName("Test").getOrCreate()
 
     def test_pyspark_validator(self):
         import pyspark.sql.types as T
