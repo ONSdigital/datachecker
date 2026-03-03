@@ -1,8 +1,5 @@
 import re
 
-import pyspark.sql.types as T
-from pyspark.sql import functions as F
-
 from datachecker.data_checkers.general_validator import Validator
 
 
@@ -16,7 +13,6 @@ class PySparkValidator(Validator):
         hard_check: bool = True,
         custom_checks: dict = None,
     ):
-        # raise NotImplementedError("PySpark support is not implemented yet")
         super().__init__(schema, data, file, format, hard_check, custom_checks)
         self._convert_schema_dtypes()
 
@@ -43,6 +39,8 @@ class PySparkValidator(Validator):
                 continue
 
     def _convert_schema_dtypes(self):
+        import pyspark.sql.types as T
+
         mapping_dtypes = {
             "int": T.IntegerType(),
             "float": T.FloatType(),
@@ -65,6 +63,8 @@ class PySparkValidator(Validator):
             )
 
     def _check_duplicates(self):
+        from pyspark.sql import functions as F
+
         # Check for duplicate rows in the dataframe
         if self.schema.get("check_duplicates", False):
             # Find duplicate rows (based on all columns)
@@ -81,6 +81,8 @@ class PySparkValidator(Validator):
             )
 
     def _check_completeness(self):
+        from pyspark.sql import functions as F
+
         if self.schema.get("check_completeness", False):
             cols_to_check = self.schema.get("completeness_columns", self.data.columns)
 
