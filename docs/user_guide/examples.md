@@ -187,7 +187,7 @@ From out yaml output we can see it failed 5 checks. These were:
     4. an invalid email address was found in row 2
     5. data type of is_active was a boolean when it was expecting an integer. 
 
-### Validating a Spark DataFrame
+## Validating a Spark DataFrame
 
 We can also perform validation checks on a Spark DataFrame using the `PySparkValidator` class. To do this we will first start a Spark session and use the existing `data` variable to create a Spark DataFrame.
 
@@ -244,4 +244,5 @@ check_and_export(
     format="html",
     hard_check=False,
 )
+
 ```
