@@ -1,3 +1,5 @@
+import warnings
+
 import pandas as pd
 import pandera.pandas as pa
 
@@ -174,6 +176,12 @@ def min_decimal(value: int, library=pa):
     get_dtype_lib().Check
         A pandera check for the minimum decimal places.
     """
+    warnings.warn(
+        "Decimal place checks may not work as expected for "
+        "pyspark or polars due to using pandas lambda functions",
+        UserWarning,
+        stacklevel=2,
+    )
     return library.Check(
         lambda x: (isinstance(x, float) and not pd.isnull(x) and len(str(x).split(".")[1]) >= value)
         if isinstance(x, float) and not pd.isnull(x)
@@ -197,6 +205,12 @@ def max_decimal(value: int, library=pa):
     get_dtype_lib().Check
         A pandera check for the maximum decimal places.
     """
+    warnings.warn(
+        "Decimal place checks may not work as expected for "
+        "pyspark or polars due to using pandas lambda functions",
+        UserWarning,
+        stacklevel=2,
+    )
     return library.Check(
         lambda x: (isinstance(x, float) and not pd.isnull(x) and len(str(x).split(".")[1]) <= value)
         if isinstance(x, float) and not pd.isnull(x)
@@ -286,6 +300,12 @@ def convert_schema(schema: dict, df, custom_checks: dict = None) -> pa.DataFrame
         if "max_length" in constraints:
             checks.append(string_length(max_length=constraints["max_length"], library=library))
         if "allowed_strings" in constraints:
+            warnings.warn(
+                "Regex patterns are not supported for allowed_strings in pyspark, "
+                "please use a list of allowed strings instead.",
+                UserWarning,
+                stacklevel=2,
+            )
             checks.append(allowed_strings(constraints["allowed_strings"], library=library))
         if "forbidden_strings" in constraints:
             checks.append(forbidden_strings(constraints["forbidden_strings"], library=library))

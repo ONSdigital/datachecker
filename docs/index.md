@@ -74,3 +74,21 @@ new_validator.validate()
 | any              | Class                  | class             | Checks that column data Class matches the specified type                                                                          |
 
 [lambda-functions]: https://realpython.com/python-lambda/
+
+# Pandas, Polars and PySpark Check Status
+
+| Check       | Pandas | Polars | PySpark |
+|-------------|:-----------------:|:-------------:|:------------:| 
+| Minimum value                   | ✓ | ✓ | ✓ |
+| Maximum value                   | ✓ | ✓ | ✓ |
+| Minimum length                  | ✓ | ✓ | ✓ |
+| Maximum length                  | ✓ | ✓ | ✓ |
+| Allowed strings (using lists)   | ✓ | ✓ | ✓ |
+| Allowed strings (using regex)   | ✓ | ✓ | ✗ |
+| Forbidden strings (using lists) | ✓ | ✓ | ✓ |
+| Forbidden strings (using regex) | ✗ | ✗ | ✗ |
+| Minimum decimal places          | ✓ | ✗ | ✗ |
+| Maximum decimal places          | ✓ | ✗ | ✗ |
+| Minimum Date / Datetime         | ✓ | ✓ | ✓ |
+| Maximum Date / Datetime         | ✓ | ✓ | ✓ |
+| Custom Checks                   | ✓ | ✗ | ✗ |
