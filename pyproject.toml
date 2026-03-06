@@ -12,11 +12,12 @@ classifiers = [
     "Programming Language :: Python :: 3.12"
 ]
 dependencies = [
+    "findspark",
     "pyyaml",
     "pandas<3.0.0",
     "tomli",
     "jinja2",
-    "pandera[pandas]>=0.26.1",
+    "pandera>=0.26.1",
 ]
 
 [tool.setuptools.packages.find]
@@ -53,8 +54,8 @@ dev = [
     "bump_my_version",
     "pre-commit",
     "polars",
-    "pandera[polars]",
-    "pyarrow"
+    "pyarrow",
+    "grpcio"
 ]
 docs = [
     "mkdocs",
@@ -65,12 +66,11 @@ docs = [
     "mkdocs-mermaid2-plugin"
 ]
 polars = [
-    "polars",
-    "pandera[polars]",
+    "polars>=0.20.0",
     "pyarrow"
 ]
 pyspark = [
-    "pandera[pyspark]"
+    "grpcio"
 ]
 
 [tool.setuptools]

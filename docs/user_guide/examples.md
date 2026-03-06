@@ -44,7 +44,6 @@ schema = {
         }
     }
 }
-
 ```
 
 Next we need to load our dataset, for this example we will instead create our dataframe within our script. Note for this example we have actually created the `is_active` column to be a boolean and not a integer as outlined in our schema. This should be picked up in our validation checks! Also one email is slightly incorrect and a name contains a number.
@@ -188,3 +187,62 @@ From out yaml output we can see it failed 5 checks. These were:
     4. an invalid email address was found in row 2
     5. data type of is_active was a boolean when it was expecting an integer. 
 
+## Validating a Spark DataFrame
+
+We can also perform validation checks on a Spark DataFrame using the `PySparkValidator` class. To do this we will first start a Spark session and use the existing `data` variable to create a Spark DataFrame.
+
+```Python
+from pyspark.sql import SparkSession
+
+spark = (
+    SparkSession.builder.master("local")
+    .appName("local_session")
+    .getOrCreate()
+)
+
+sdf = spark.createDataFrame(data)
+sdf.show()
+```
+
+```
++---+--------------------+---------+------------+
+|age|               email|is_active|        name|
++---+--------------------+---------+------------+
+| 30|john.doe@example.com|     true|    John Doe|
+| 25|jane.smith@exampl...|    false|  Jane Smith|
+| 40|     alice.brown.com|     true| Alice Brown|
+|-22|bob.white@example...|    false|   Bob White|
+| 35|carol.green@examp...|     true|Carol Green1|
+| 28|eve.black@example...|    false|   Eve Black|
++---+--------------------+---------+------------+
+```
+
+We can now create an instance of `PySparkValidator`, using the new Spark DataFrame and the existing schema as parameters.
+
+```Python
+from datachecker import PySparkValidator
+
+validator = PySparkValidator(
+    schema=schema, 
+    data=sdf, 
+    file="pyspark_report.yaml", 
+    format="yaml", 
+    hard_check=False
+)
+validator.validate()
+validator.export()
+print(new_validator)
+```
+
+`check_and_export` is also able to take a Spark DataFrame as a parameter to export a validation report in a single function call.
+
+```Python
+check_and_export(
+    schema=schema,
+    data=sdf,
+    file="pyspark_report.html",
+    format="html",
+    hard_check=False,
+)
+
+```

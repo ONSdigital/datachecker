@@ -1,9 +1,8 @@
-import pandas as pd
-import polars as pl
-
+from datachecker.checks_loaders_and_exporters.checks import _type_id
 from datachecker.data_checkers.general_validator import Validator
 from datachecker.data_checkers.pandas_validator import DataValidator
 from datachecker.data_checkers.polars_validator import PolarsValidator
+from datachecker.data_checkers.pyspark_validator import PySparkValidator
 
 
 def check_and_export(schema, data, file, format, hard_check=True, custom_checks=None) -> Validator:
@@ -30,7 +29,9 @@ def check_and_export(schema, data, file, format, hard_check=True, custom_checks=
     DataValidator
         Returns data validator object after validation and export.
     """
-    if type(data) is pl.DataFrame:
+    mod, name = _type_id(data)
+
+    if (mod, name) == ("polars.dataframe.frame", "DataFrame"):
         validator = PolarsValidator(
             schema=schema,
             data=data,
@@ -39,8 +40,22 @@ def check_and_export(schema, data, file, format, hard_check=True, custom_checks=
             hard_check=hard_check,
             custom_checks=custom_checks,
         )
-    elif type(data) is pd.DataFrame:
+
+    if (mod, name) == ("pandas.core.frame", "DataFrame"):
         validator = DataValidator(
+            schema=schema,
+            data=data,
+            file=file,
+            format=format,
+            hard_check=hard_check,
+            custom_checks=custom_checks,
+        )
+
+    if (mod, name) == ("pyspark.sql.dataframe", "DataFrame") or (mod, name) == (
+        "pyspark.sql.classic.dataframe",
+        "DataFrame",
+    ):
+        validator = PySparkValidator(
             schema=schema,
             data=data,
             file=file,
