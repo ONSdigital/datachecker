@@ -1,4 +1,5 @@
 import re
+import warnings
 
 from datachecker.data_checkers.general_validator import Validator
 
@@ -13,6 +14,12 @@ class PySparkValidator(Validator):
         hard_check: bool = True,
         custom_checks: dict = None,
     ):
+        warnings.warn(
+            "PySparkValidator is in early stages of development. "
+            "Please open issues on GitHub if you encounter any strange or broken behaviour",
+            UserWarning,
+            stacklevel=2,
+        )
         super().__init__(schema, data, file, format, hard_check, custom_checks)
         self._convert_schema_dtypes()
 
