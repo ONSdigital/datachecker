@@ -83,9 +83,9 @@ new_validator.validate()
 | Maximum value                   | ✓ | ✓ | ✓ |
 | Minimum length                  | ✓ | ✓ | ✓ |
 | Maximum length                  | ✓ | ✓ | ✓ |
-| Allowed strings (using lists)   | ✓ | ✗ | ✓ |
-| Allowed strings (using regex)   | ✓ | ✗ | ✗ |
-| Forbidden strings (using lists) | ✓ | ✗ | ✓ |
+| Allowed strings (using lists)   | ✓ | ✓ | ✓ |
+| Allowed strings (using regex)   | ✓ | ✓ | ✗ |
+| Forbidden strings (using lists) | ✓ | ✓ | ✓ |
 | Forbidden strings (using regex) | ✗ | ✗ | ✗ |
 | Minimum decimal places          | ✓ | ✗ | ✗ |
 | Maximum decimal places          | ✓ | ✗ | ✗ |

@@ -64,6 +64,7 @@ theme:
     - navigation.expand
     - navigation.tabs.sticky
     - navigation.footer
+  custom_dir: overrides
 
 markdown_extensions:
   - pymdownx.highlight:
