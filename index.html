@@ -150,6 +150,19 @@
     </div>
     <div data-md-component="announce">
       
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            
+  <!-- Add announcement here, including arbitrary HTML -->
+  <div style="text-align: center;">
+    <strong><em>We have added support for Polars and PySpark Dataframes, see <a href="/#pandas-polars-and-pyspark-check-status">the table for further details on supported features</a></em></strong>
+  </div>
+
+          </div>
+          
+        </aside>
+      
     </div>
     
     
@@ -1093,6 +1106,97 @@ Then when creating your <code>DataValidator</code> object, simply pass this as a
 <td>Class</td>
 <td>class</td>
 <td>Checks that column data Class matches the specified type</td>
+</tr>
+</tbody>
+</table>
+<h1 id="pandas-polars-and-pyspark-check-status">Pandas, Polars and PySpark Check Status</h1>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th style="text-align: center;">Pandas</th>
+<th style="text-align: center;">Polars</th>
+<th style="text-align: center;">PySpark</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minimum value</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>Maximum value</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>Minimum length</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>Maximum length</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>Allowed strings (using lists)</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>Allowed strings (using regex)</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+</tr>
+<tr>
+<td>Forbidden strings (using lists)</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>Forbidden strings (using regex)</td>
+<td style="text-align: center;">✗</td>
+<td style="text-align: center;">✗</td>
+<td style="text-align: center;">✗</td>
+</tr>
+<tr>
+<td>Minimum decimal places</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+<td style="text-align: center;">✗</td>
+</tr>
+<tr>
+<td>Maximum decimal places</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+<td style="text-align: center;">✗</td>
+</tr>
+<tr>
+<td>Minimum Date / Datetime</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>Maximum Date / Datetime</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>Custom Checks</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+<td style="text-align: center;">✗</td>
 </tr>
 </tbody>
 </table>
