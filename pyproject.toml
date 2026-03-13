@@ -12,7 +12,6 @@ classifiers = [
     "Programming Language :: Python :: 3.12"
 ]
 dependencies = [
-    "findspark",
     "pyyaml",
     "pandas<3.0.0",
     "tomli",
@@ -55,6 +54,7 @@ dev = [
     "pre-commit",
     "polars",
     "pyarrow",
+    "findspark",
     "grpcio"
 ]
 docs = [

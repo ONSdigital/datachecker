@@ -28,6 +28,42 @@ Python dependencies using:
 pip install git+https://github.com/ONSdigital/datachecker.git
 ```
 
+or from PyPI:
+
+```shell
+pip install onsdatachecker
+```
+
+### Polars support
+
+To install the required packages for polars please run the one of the following commands:
+
+```shell
+# Polars support from PyPI
+pip install onsdatachecker[polars]
+
+# To install polars support from github:
+pip install "git+https://github.com/ONSdigital/datachecker.git#egg=datachecker[polars]"
+```
+
+The github install may break in future pip updates, we will remove this option once we have fully transitioned to using PyPI for hosting
+
+### Pyspark support
+
+To install the required packages for pyspark please run the one of the following commands:
+
+```shell
+pip install onsdatachecker[pyspark]
+
+# To install pyspark support from github:
+pip install "git+https://github.com/ONSdigital/datachecker.git#egg=datachecker[pyspark]"
+```
+
+N.B. this does not install the pyspark package, due to ONS systems having a different install for pyspark.
+You may need to install this separately, but shouldn't be needed for ONS colleagues
+
+The github install may break in future pip updates, we will remove this option once we have fully transitioned to using PyPI for hosting
+
 ## Pre-Defined Checks
 
 These checks can be included in the lists for individual columns in your schema, depending on the data type.

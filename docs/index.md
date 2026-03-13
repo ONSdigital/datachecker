@@ -4,10 +4,29 @@
 
 ```Bash
 pip install git+https://github.com/ONSdigital/datachecker.git
+
+# To install polars support from github:
+pip install "git+https://github.com/ONSdigital/datachecker.git#egg=datachecker[polars]"
+
+# To install pyspark support from github:
+pip install "git+https://github.com/ONSdigital/datachecker.git#egg=datachecker[pyspark]"
 ```
-create a schema for your dataset (either in python or read in the supported formats).
-Load in your dataset.
-Create a new validator object using 
+
+```bash
+pip install onsdatachecker
+
+# To install polars support from PyPI
+pip install onsdatachecker[polars]
+
+# To install pyspark support from github
+pip install onsdatachecker[pyspark]
+```
+!!! note 
+    Pyspark support does not install the required pyspark packages due to ONS system setup. If you need to install this in your environment you will need to run `pip install pyspark[connect`]
+
+
+Next create a schema for your dataset (either in python or read in the supported formats).
+Load in your dataset and then create a new validator object using: 
 
 ```python
 from datachecker import check_and_export
