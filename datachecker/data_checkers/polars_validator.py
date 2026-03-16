@@ -1,7 +1,5 @@
 from itertools import product
 
-import polars as pl
-
 from datachecker.data_checkers.general_validator import Validator
 
 
@@ -9,7 +7,7 @@ class PolarsValidator(Validator):
     def __init__(
         self,
         schema: dict,
-        data: pl.DataFrame,
+        data,
         file: str,
         format: str,
         hard_check: bool = True,
