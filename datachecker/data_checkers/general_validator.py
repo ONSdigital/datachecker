@@ -67,7 +67,7 @@ class SetupStructure:
             "python_version": platform.python_version(),
             "pandas_version": pd.__version__,
             "pandera_version": pandera.__version__,
-            "datachecker_version": version("datachecker"),
+            "datachecker_version": version("onsdatachecker"),
         }
         return [sys_info]
 
