@@ -2,15 +2,9 @@
 
 ## Quickstart 
 ### Installing from Github
-
+It is not recommended to install specific requirements via Github, instead use the [PyPI install method](#Installing-from-PyPI) 
 ```Bash
 pip install git+https://github.com/ONSdigital/datachecker.git
-
-# To install polars support from github:
-pip install "git+https://github.com/ONSdigital/datachecker.git#egg=datachecker[polars]"
-
-# To install pyspark support from github:
-pip install "git+https://github.com/ONSdigital/datachecker.git#egg=datachecker[pyspark]"
 ```
 ### Installing from PyPI
 
@@ -24,7 +18,7 @@ pip install onsdatachecker[polars]
 pip install onsdatachecker[pyspark]
 ```
 !!! note 
-    Pyspark support does not install the required pyspark packages due to ONS system setup. If you need to install this in your environment you will need to run `pip install pyspark[connect`]
+    Pyspark support does not install the required pyspark packages due to ONS system setup. If you need to install this in your environment you will need to run `pip install pyspark[connect]`
 
 ### Running checks
 
