@@ -1,4 +1,4 @@
-# `datachecker`
+# `onsdatachecker`
 
 A Data checker which uses pandera to perform the bulk checks.
 This wrapper can be used to check contents of a dataframe against a pre defined schema
@@ -25,7 +25,7 @@ Whilst in the root folder, in a terminal, you can install the package and its
 Python dependencies using:
 
 ```shell
-pip install git+https://github.com/ONSdigital/datachecker.git
+pip install git+https://github.com/ONSdigital/onsdatachecker.git
 ```
 
 ## Pre-Defined Checks
@@ -105,8 +105,8 @@ The cookiecutter template generated for each project will follow this folder str
 
 ```shell
 .
-├── datachecker/
-│   └── datachecker/
+├── onsdatachecker/
+│   └── onsdatachecker/
 │       ├── checks_loaders_and_exporters/
 │       │   ├── __init__.py
 │       │   └── checks.py
@@ -136,7 +136,7 @@ Crown copyright and available under the terms of the Open Government 3.0 licence
 
 ## Contributing
 
-If you want to help us build and improve `datachecker`, please take a look at our
+If you want to help us build and improve `onsdatachecker`, please take a look at our
 [contributing guidelines][contributing].
 
 ## Acknowledgements

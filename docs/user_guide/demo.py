@@ -2,7 +2,7 @@ import time
 
 import pandas as pd
 
-from datachecker import DataValidator, check_and_export
+from onsdatachecker import DataValidator, check_and_export
 
 tic = time.time()
 schema = {

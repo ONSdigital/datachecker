@@ -2,7 +2,7 @@ import time
 
 import polars
 
-from datachecker import PolarsValidator, check_and_export
+from onsdatachecker import PolarsValidator, check_and_export
 
 tic = time.time()
 schema = {

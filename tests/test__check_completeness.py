@@ -1,6 +1,6 @@
 import pandas as pd
 
-from datachecker import DataValidator
+from onsdatachecker import DataValidator
 
 
 class TestCheckCompleteness:

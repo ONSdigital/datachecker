@@ -1,16 +1,16 @@
-# Datachecker
+# onsdatachecker
 
 ## Quickstart 
 
 ```Bash
-pip install git+https://github.com/ONSdigital/datachecker.git
+pip install git+https://github.com/ONSdigital/onsdatachecker.git
 ```
 create a schema for your dataset (either in python or read in the supported formats).
 Load in your dataset.
 Create a new validator object using 
 
 ```python
-from datachecker import check_and_export
+from onsdatachecker import check_and_export
 validator = check_and_export(
     df=dataframe,
     schema="path/to_schema.json",

@@ -7,12 +7,12 @@ from importlib.metadata import version
 import pandas as pd
 import pandera
 
-from datachecker.checks_loaders_and_exporters.checks import (
+from onsdatachecker.checks_loaders_and_exporters.checks import (
     convert_schema,
     validate_using_pandera,
 )
-from datachecker.checks_loaders_and_exporters.schema_loader import SchemaLoader
-from datachecker.checks_loaders_and_exporters.validator_exporter import Exporter
+from onsdatachecker.checks_loaders_and_exporters.schema_loader import SchemaLoader
+from onsdatachecker.checks_loaders_and_exporters.validator_exporter import Exporter
 
 
 class SetupStructure:

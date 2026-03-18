@@ -2,7 +2,7 @@ from itertools import product
 
 import pandas as pd
 
-from datachecker.data_checkers.general_validator import Validator
+from onsdatachecker.data_checkers.general_validator import Validator
 
 
 class DataValidator(Validator):
