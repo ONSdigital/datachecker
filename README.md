@@ -54,8 +54,9 @@ To install the required packages for pyspark please run the one of the following
 pip install onsdatachecker[pyspark]
 ```
 
-N.B. this does not install the pyspark package, due to ONS systems having a different install for pyspark.
-You may need to install this separately, but shouldn't be needed for ONS colleagues
+N.B. this does not install the pyspark package, due to ONS DAP having a different install for pyspark.
+You may need to install this separately, but shouldn't be needed for ONS colleagues working in DAP.
+For networked laptops you will need to install pyspark as usual (`pip install pyspark[connect]`)
 
 ## Pre-Defined Checks
 
