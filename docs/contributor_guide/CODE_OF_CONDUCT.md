@@ -1,4 +1,4 @@
-# Code of conduct for `datachecker`
+# Code of conduct for `onsdatachecker`
 
 All contributors to this repository hosted by `ONS` are expected to follow the
 Contributor Covenant Code of Conduct. Those working within HM Government are also expected to follow the [Civil Service
@@ -10,7 +10,7 @@ Code][civil-service-code].
 
 Where this Code of Conduct says:
 
-- "Project", we mean this repository `datachecker` ;
+- "Project", we mean this repository `onsdatachecker` ;
 - "Maintainer", we mean active developers of the primary project team(s) behind `ONS`; and
 - "Leadership", we mean `ONS` organisation owners, line managers, and other
   leadership within HMG.

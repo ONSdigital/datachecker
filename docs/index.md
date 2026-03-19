@@ -1,10 +1,10 @@
-# Datachecker
+# onsdatachecker
 
 ## Quickstart 
 ### Installing from Github
 It is not recommended to install specific requirements via Github, instead use the [PyPI install method](#Installing-from-PyPI) 
 ```Bash
-pip install git+https://github.com/ONSdigital/datachecker.git
+pip install git+https://github.com/ONSdigital/onsdatachecker.git
 ```
 ### Installing from PyPI
 
@@ -28,7 +28,7 @@ Next create a schema for your dataset (either in python or read in the supported
 Load in your dataset and then create a new validator object using: 
 
 ```python
-from datachecker import check_and_export
+from onsdatachecker import check_and_export
 validator = check_and_export(
     df=dataframe,
     schema="path/to_schema.json",

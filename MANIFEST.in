@@ -1,1 +1,1 @@
-include datachecker/checks_loaders_and_exporters/validator_template.html
+include onsdatachecker/checks_loaders_and_exporters/validator_template.html

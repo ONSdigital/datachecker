@@ -22,7 +22,7 @@ class TestPysparkValidator:
     def test_pyspark_validator(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
         df = pd.DataFrame(
             {
@@ -65,7 +65,7 @@ class TestPysparkValidator:
     def test_pyspark_all_dtypes_fails(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
         df = pd.DataFrame(
             {
@@ -156,7 +156,7 @@ class TestPysparkValidator:
     def test_pyspark_validate_boilerplate_checks(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
         df = pd.DataFrame(
             {
@@ -194,7 +194,7 @@ class TestPysparkValidator:
     def test_pyspark_validate_check_duplicates_fail(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
         df = pd.DataFrame(
             {
@@ -249,7 +249,7 @@ class TestPysparkValidator:
     def test_pyspark_validate_check_duplicates_pass(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
         df = pd.DataFrame(
             {
@@ -295,7 +295,7 @@ class TestPysparkValidator:
     def test_pyspark_validate_check_completeness_pass(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
         df = pd.DataFrame({"id": [1, 2, 3, 4], "age": [10, 20, 10, 20], "sex": ["M", "M", "F", "F"]})
         spark_df = self.spark.createDataFrame(df)
@@ -325,7 +325,7 @@ class TestPysparkValidator:
     def test_pyspark_validate_check_completeness_fail(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
         df = pd.DataFrame({"id": [1, 2, 3, 4], "age": [10, 20, 10, 20], "sex": ["M", "M", "F", "F"]})
         df_dropped_row = df.iloc[0:3]  # Remove one row to create incompleteness

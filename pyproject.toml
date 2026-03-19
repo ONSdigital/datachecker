@@ -22,9 +22,9 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
-    "datachecker",
-    "datachecker.checks_loaders_and_exporters",
-    "datachecker.data_checkers"
+    "onsdatachecker",
+    "onsdatachecker.checks_loaders_and_exporters",
+    "onsdatachecker.data_checkers"
 ]
 
 [tool.bumpversion]

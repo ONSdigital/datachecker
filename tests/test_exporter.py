@@ -3,7 +3,7 @@ import tempfile
 
 import pytest
 
-from datachecker.checks_loaders_and_exporters.validator_exporter import Exporter
+from onsdatachecker.checks_loaders_and_exporters.validator_exporter import Exporter
 
 
 def dummy_exporter(data, file):

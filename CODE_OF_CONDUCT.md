@@ -1,4 +1,4 @@
-# Code of conduct for `datachecker`
+# Code of conduct for `onsdatachecker`
 
 [Our code of conduct can be found at
 `docs/contributor_guide/CODE_OF_CONDUCT.md`][code-of-conduct].
