@@ -1,13 +1,31 @@
 # onsdatachecker
 
 ## Quickstart 
-
+### Installing from Github
+It is not recommended to install specific requirements via Github, instead use the [PyPI install method](#Installing-from-PyPI) 
 ```Bash
 pip install git+https://github.com/ONSdigital/onsdatachecker.git
 ```
-create a schema for your dataset (either in python or read in the supported formats).
-Load in your dataset.
-Create a new validator object using 
+### Installing from PyPI
+
+```bash
+pip install onsdatachecker
+
+# To install polars support from PyPI
+pip install onsdatachecker[polars]
+
+# To install pyspark support from github
+pip install onsdatachecker[pyspark]
+```
+!!! note 
+    Pyspark support does not install the pyspark package, due to ONS DAP having a different install for pyspark.
+You may need to install this separately, but shouldn't be needed for ONS colleagues working in DAP.
+For networked laptops you will need to install pyspark as usual (`pip install pyspark[connect]`)
+
+### Running checks
+
+Next create a schema for your dataset (either in python or read in the supported formats).
+Load in your dataset and then create a new validator object using: 
 
 ```python
 from onsdatachecker import check_and_export
@@ -75,7 +93,7 @@ new_validator.validate()
 
 [lambda-functions]: https://realpython.com/python-lambda/
 
-# Pandas, Polars and PySpark Check Status
+## Pandas, Polars and PySpark Check Status
 
 | Check       | Pandas | Polars | PySpark |
 |-------------|:-----------------:|:-------------:|:------------:| 

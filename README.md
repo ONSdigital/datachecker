@@ -28,6 +28,36 @@ Python dependencies using:
 pip install git+https://github.com/ONSdigital/onsdatachecker.git
 ```
 
+or from PyPI:
+
+```shell
+pip install onsdatachecker
+```
+
+It is not recommended to install specific requirements via Github, instead 
+use the following methods for installing from PyPI 
+
+### Polars support
+
+To install the required packages for polars please run the one of the following commands:
+
+```shell
+# Polars support from PyPI
+pip install onsdatachecker[polars]
+```
+
+### Pyspark support
+
+To install the required packages for pyspark please run the one of the following commands:
+
+```shell
+pip install onsdatachecker[pyspark]
+```
+
+N.B. this does not install the pyspark package, due to ONS DAP having a different install for pyspark.
+You may need to install this separately, but shouldn't be needed for ONS colleagues working in DAP.
+For networked laptops you will need to install pyspark as usual (`pip install pyspark[connect]`)
+
 ## Pre-Defined Checks
 
 These checks can be included in the lists for individual columns in your schema, depending on the data type.
