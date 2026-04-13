@@ -44,7 +44,13 @@ class PolarsValidator(Validator):
                 result = False
                 missing_dict = {}
                 for col in cols_to_check:
-                    missing_dict.update({col: missing_df.filter(col).select("_row_nr").rows()})
+                    missing_dict.update(
+                        {
+                            col: pl.Series(
+                                missing_df.filter(col).select("_row_nr").get_columns()
+                            ).to_list()[0]
+                        }
+                    )
             else:
                 result = True
                 missing_dict = None
