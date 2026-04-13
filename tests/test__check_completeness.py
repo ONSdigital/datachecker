@@ -30,9 +30,17 @@ class TestCheckCompleteness:
         assert completeness_entry["outcome"] == "pass"
 
     def test__check_completeness_fail(self):
-        df_dropped_row = self.df.iloc[0:3]  # Remove one row to create incompleteness
-        validator = DataValidator(schema=self.schema, data=df_dropped_row, file=None, format=None)
+        df_na = self.df
+
+        # Introduce random NAs
+        df_na["age"] = df_na["age"].sample(frac=0.5)
+        df_na["sex"] = df_na["sex"].sample(frac=0.5)
+
+        validator = DataValidator(schema=self.schema, data=df_na, file=None, format=None)
         validator._check_completeness()
+
+        print(validator.log[1:])
+
         completeness_entry = [
             entry
             for entry in validator.log[1:]

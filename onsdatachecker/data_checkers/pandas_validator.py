@@ -1,5 +1,3 @@
-from itertools import product
-
 import pandas as pd
 
 from onsdatachecker.data_checkers.general_validator import Validator
@@ -37,19 +35,26 @@ class DataValidator(Validator):
     def _check_completeness(self):
         if self.schema.get("check_completeness", False):
             cols_to_check = self.schema.get("completeness_columns", self.data.columns.tolist())
-            # Generate all possible combinations of the column values
-            unique_values = [self.data[col].dropna().unique() for col in cols_to_check]
-            combinations = set(product(*unique_values))
-            existing_combinations = set(map(tuple, self.data[cols_to_check].dropna().values))
-            missing_combinations = combinations - existing_combinations
-            result = len(missing_combinations) == 0
+
+            missing_df = self.data[cols_to_check].isna()
+
+            if missing_df.any().any():
+                result = False
+                missing_dict = {}
+                for col in cols_to_check:
+                    missing_dict.update({col: missing_df[missing_df[col]].index.tolist()})
+            else:
+                result = True
+                missing_dict = None
+
             if len(cols_to_check) > 4:
                 cols_to_check = cols_to_check[:4] + ["..."]
             formatted_cols_to_check = ", ".join(cols_to_check)
+
             self._add_qa_entry(
                 description="Checking for missing rows in the dataframe "
                 + f"columns: {formatted_cols_to_check}",
-                failing_ids=None,
+                failing_ids=missing_dict,
                 outcome=result,
                 entry_type="error",
             )
