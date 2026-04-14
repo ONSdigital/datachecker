@@ -1,9 +1,6 @@
 import re
 import warnings
 
-import pyspark.pandas as pypd
-import pyspark.sql.functions as F
-
 from onsdatachecker.data_checkers.general_validator import Validator
 
 
@@ -73,6 +70,8 @@ class PySparkValidator(Validator):
             )
 
     def _check_duplicates(self):
+        from pyspark.sql import functions as F
+
         # Check for duplicate rows in the dataframe
         if self.schema.get("check_duplicates", False):
             # Find duplicate rows (based on all columns)
@@ -89,6 +88,8 @@ class PySparkValidator(Validator):
             )
 
     def _check_completeness(self):
+        import pyspark.pandas as pypd
+
         if self.schema.get("check_completeness", False):
             cols_to_check = self.schema.get("completeness_columns", self.data.columns)
 
