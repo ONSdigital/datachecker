@@ -38,6 +38,7 @@ class DataValidator(Validator):
 
             missing_df = self.data[cols_to_check].isna()
 
+            # True/False evaluation for the presence of missing values
             if missing_df.any().any():
                 result = False
                 missing_dict = {}
