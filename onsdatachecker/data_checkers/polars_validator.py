@@ -41,7 +41,13 @@ class PolarsValidator(Validator):
             )
 
             # True/False evaluation for the presence of missing values
-            missing_eval = missing_df.drop("_row_nr").to_pandas().any().any()
+            missing_eval = (
+                missing_df.drop("_row_nr")
+                .select(pl.any_horizontal(pl.all()))
+                .to_pandas()
+                .any()
+                .any()
+            )
 
             if missing_eval:
                 result = False
