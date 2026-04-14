@@ -24,8 +24,12 @@ class DataValidator(Validator):
 
     def _check_duplicates(self):
         # Check for duplicate rows in the dataframe
+        col_subset = self.schema.get("duplicates_columns", None)
+        if col_subset is None:
+            col_subset = self.data.columns
+
         if self.schema.get("check_duplicates", False):
-            duplicate_rows = self.data[self.data.duplicated(keep="first")]
+            duplicate_rows = self.data[self.data.duplicated(subset=col_subset, keep="first")]
             duplicate_indices = duplicate_rows.index.tolist()
             self._add_qa_entry(
                 description="Checking for duplicate rows in the dataframe",
