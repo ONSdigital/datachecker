@@ -34,11 +34,14 @@ class PolarsValidator(Validator):
         if self.schema.get("check_completeness", False):
             cols_to_check = self.schema.get("completeness_columns", self.data.columns)
 
-            missing_df = self.data.with_columns(pl.col(cols_to_check).is_null()).with_row_index(
-                "_row_nr"
+            missing_df = (
+                self.data.select(cols_to_check)
+                .with_columns(pl.col(cols_to_check).is_null())
+                .with_row_index("_row_nr")
             )
 
-            missing_eval = missing_df.select(pl.any_horizontal(pl.all())).to_pandas().any()
+            # True/False evaluation for the presence of missing values
+            missing_eval = missing_df.drop("_row_nr").to_pandas().any().any()
 
             if missing_eval:
                 result = False
@@ -58,6 +61,7 @@ class PolarsValidator(Validator):
             if len(cols_to_check) > 4:
                 cols_to_check = cols_to_check[:4] + ["..."]
             formatted_cols_to_check = ", ".join(cols_to_check)
+
             self._add_qa_entry(
                 description="Checking for missing rows in the dataframe "
                 + f"columns: {formatted_cols_to_check}",

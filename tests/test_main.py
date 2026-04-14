@@ -182,8 +182,8 @@ class TestCheckAndExport:
 
 
 class TestPolarsValidaor:
-    def test_polars_validator(self):
-        df = pl.DataFrame(
+    def setup_method(self):
+        self.df = pl.DataFrame(
             {
                 "id": [1, 2, 3, 2],
                 "name": ["Alice", "Bob", "Charlie", "Bob"],
@@ -192,7 +192,7 @@ class TestPolarsValidaor:
             }
         )
 
-        schema = {
+        self.schema = {
             "check_duplicates": True,
             "check_completeness": True,
             "columns": {
@@ -203,8 +203,9 @@ class TestPolarsValidaor:
             },
         }
 
+    def test_polars_validator(self):
         new_validator = PolarsValidator(
-            schema=schema, data=df, file="temp.html", format="html", hard_check=False
+            schema=self.schema, data=self.df, file="temp.html", format="html", hard_check=False
         )
         new_validator.validate()
         new_validator.export()
@@ -217,15 +218,6 @@ class TestPolarsValidaor:
         os.remove("temp.html")
 
     def test_polars_all_dtypes(self):
-        df = pl.DataFrame(
-            {
-                "id": [1, 2, 3, 2],
-                "name": ["Alice", "Bob", "Charlie", "Bob"],
-                "score": [90.5, 82.0, 95.25, 82.0],
-                "passed": [True, True, True, True],
-            }
-        )
-
         schema = {
             "check_duplicates": True,
             "check_completeness": True,
@@ -257,7 +249,7 @@ class TestPolarsValidaor:
             },
         }
         new_validator = PolarsValidator(
-            schema=schema, data=df, file="temp.html", format="html", hard_check=False
+            schema=schema, data=self.df, file="temp.html", format="html", hard_check=False
         )
         new_validator.validate()
         new_validator.export()
@@ -268,3 +260,32 @@ class TestPolarsValidaor:
 
         # Clean up
         os.remove("temp.html")
+
+    def test_check_completeness_pass(self):
+        validator = PolarsValidator(schema=self.schema, data=self.df, file=None, format=None)
+        validator._check_completeness()
+        completeness_entry = [
+            entry
+            for entry in validator.log[1:]
+            if "Checking for missing rows in the dataframe columns" in entry["description"]
+        ][0]
+        assert completeness_entry["outcome"] == "pass"
+
+    def test_check_completeness_fail(self):
+        df_na = pl.DataFrame(
+            {
+                "id": [1, 2, 3, 2],
+                "name": ["Alice", "Bob", "Charlie", "Bob"],
+                "score": [90.5, None, 95.25, 82.0],
+                "passed": [True, True, True, True],
+            }
+        )
+
+        validator = PolarsValidator(schema=self.schema, data=df_na, file=None, format=None)
+        validator._check_completeness()
+        completeness_entry = [
+            entry
+            for entry in validator.log[1:]
+            if "Checking for missing rows in the dataframe columns" in entry["description"]
+        ][0]
+        assert completeness_entry["outcome"] == "fail"
