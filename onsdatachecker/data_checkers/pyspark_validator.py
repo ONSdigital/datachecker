@@ -1,6 +1,9 @@
 import re
 import warnings
 
+import pyspark.pandas as pypd
+import pyspark.sql.functions as F
+
 from onsdatachecker.data_checkers.general_validator import Validator
 
 
@@ -70,8 +73,6 @@ class PySparkValidator(Validator):
             )
 
     def _check_duplicates(self):
-        from pyspark.sql import functions as F
-
         # Check for duplicate rows in the dataframe
         if self.schema.get("check_duplicates", False):
             # Find duplicate rows (based on all columns)
@@ -88,41 +89,30 @@ class PySparkValidator(Validator):
             )
 
     def _check_completeness(self):
-        from pyspark.sql import functions as F
-
         if self.schema.get("check_completeness", False):
             cols_to_check = self.schema.get("completeness_columns", self.data.columns)
 
-            # Build the expected cartesian product of distinct (non-null) values per column
-            distinct_per_col = [
-                self.data.select(F.col(c)).where(F.col(c).isNotNull()).distinct()
-                for c in cols_to_check
-            ]
+            print("\n\n cols to check: \n\n", cols_to_check)
 
-            expected = distinct_per_col[0]
-            for df in distinct_per_col[1:]:
-                expected = expected.crossJoin(df)
+            missing_df = pypd.DataFrame(self.data)
+            missing_df = missing_df[cols_to_check].isna()
 
-            # Build the set of existing (non-null) combinations
-            existing = (
-                self.data.select(*[F.col(c) for c in cols_to_check])
-                .where(F.concat_ws("||", *[F.col(c) for c in cols_to_check]).isNotNull())
-                .dropna()
-                .distinct()
-            )
+            if missing_df.any().any():
+                result = False
+                missing_dict = {}
+                for col in cols_to_check:
+                    missing_dict.update({col: missing_df[missing_df[col]].index.tolist()})
+            else:
+                result = True
+                missing_dict = None
 
-            # Missing combinations are expected minus existing
-            missing_combinations = expected.subtract(existing)
-
-            # True if no missing combinations exist
-            result = missing_combinations.limit(1).count() == 0
             if len(cols_to_check) > 4:
                 cols_to_check = cols_to_check[:4] + ["..."]
             formatted_cols_to_check = ", ".join(cols_to_check)
             self._add_qa_entry(
                 description="Checking for missing rows in the dataframe "
                 + f"columns: {formatted_cols_to_check}",
-                failing_ids=None,
+                failing_ids=missing_dict,
                 outcome=result,
                 entry_type="error",
             )

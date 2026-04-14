@@ -357,6 +357,7 @@ class TestPysparkValidator:
             {"id": 1, "age": 10, "sex": "M"},
             {"id": 2, "age": 20, "sex": "M"},
             {"id": 3, "age": 10, "sex": "F"},
+            {"id": 4, "age": 20, "sex": None},
         ]
         spark_df = self.spark.createDataFrame(data)
         spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
