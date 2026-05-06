@@ -101,10 +101,10 @@ new_validator.validate()
 | Maximum value                   | ✓ | ✓ | ✓ |
 | Minimum length                  | ✓ | ✓ | ✓ |
 | Maximum length                  | ✓ | ✓ | ✓ |
-| allowed values (using lists)   | ✓ | ✓ | ✓ |
-| allowed values (using regex)   | ✓ | ✓ | ✗ |
-| forbidden values (using lists) | ✓ | ✓ | ✓ |
-| forbidden values (using regex) | ✗ | ✗ | ✗ |
+| Allowed values (using lists)   | ✓ | ✓ | ✓ |
+| Allowed values (using regex)   | ✓ | ✓ | ✗ |
+| Forbidden values (using lists) | ✓ | ✓ | ✓ |
+| Forbidden values (using regex) | ✗ | ✗ | ✗ |
 | Minimum decimal places          | ✓ | ✗ | ✗ |
 | Maximum decimal places          | ✓ | ✗ | ✗ |
 | Minimum Date / Datetime         | ✓ | ✓ | ✓ |
