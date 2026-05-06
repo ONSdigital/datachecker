@@ -27,7 +27,7 @@ schema = {
             "max_len": 10,
             "allow_na": False,
             "optional": False,
-            "allowed_strings": r"^[A-Za-z\s]+$"
+            "allowed_values": r"^[A-Za-z\s]+$"
         },
         "email": {
             "type": str,
@@ -35,7 +35,7 @@ schema = {
             "max_len": 50,
             "allow_na": False,
             "optional": False,
-            "allowed_strings": r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+            "allowed_values": r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         },
         "is_active": {
             "type": int,

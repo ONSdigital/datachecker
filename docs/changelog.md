@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Class structure (users are not impacted by change)
-
+- replaced allowed_strings with allowed_values which will now work for all data types (this would have worked previously but new name reflects this better)
+- replaced forbidden_strings with forbidden_values as above
 
 ### Removed
 - Type checking when creating checks for pandera schema (checking column type is unaffected)

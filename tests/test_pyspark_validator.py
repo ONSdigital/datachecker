@@ -121,8 +121,8 @@ class TestPysparkValidator:
                     "allow_na": False,
                     "optional": False,
                     "max_length": 10,
-                    # allowed strings not working for pyspark with regex
-                    "allowed_strings": ["Alice", "Bob", "Charlie", "Daniel"],
+                    # allowed values not working for pyspark with regex
+                    "allowed_values": ["Alice", "Bob", "Charlie", "Daniel"],
                 },
                 "score": {
                     "type": "float",
