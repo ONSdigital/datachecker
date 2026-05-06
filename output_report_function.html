@@ -1,0 +1,482 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>output_report_function</title>
+      <style>
+        body {
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 16px;
+          line-height: 1.5;
+          margin: 0;
+          padding: 0;
+          background-color: #fff;
+          color: #222;
+          transition: background-color 0.3s, color 0.3s;
+        }
+        header {
+          background-color: #f8f9fa;
+          padding: 1rem;
+          text-align: center;
+          transition: background-color 0.3s;
+        }
+        main {
+          padding: 1rem;
+        }
+        .container {
+          margin-left: 20px;
+          margin-right: 20px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 1rem;
+        }
+        th, td {
+          border: 1px solid #ddd;
+          padding: 0.5rem;
+          text-align: left;
+        }
+        th {
+          background-color: #f2f2f2;
+          transition: background-color 0.3s;
+        }
+        .no-bullets {
+          list-style-type: none;
+          padding-left: 0;
+          margin: 0;
+        }
+        .no-bullets li {
+          margin-bottom: 0.25rem;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+          background-color: #181a1b;
+          color: #e0e0e0;
+        }
+        body.dark-mode header {
+          background-color: #23272b;
+        }
+        body.dark-mode th {
+          background-color: #23272b;
+        }
+        body.dark-mode td, body.dark-mode table {
+          border-color: #444;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <header>
+          <h1>QA Log</h1>
+          <button id="toggle-dark" style="float:right; margin-top:-2.5rem; margin-right:1rem;">Toggle Dark Mode</button>
+        </header>
+        <br>
+        <h2>System Information</h2>
+        <ul class="no-bullets">
+        
+            <li><strong>date:</strong> 2026-04-15</li>
+        
+            <li><strong>user:</strong> dayj1</li>
+        
+            <li><strong>device:</strong> ONS36536</li>
+        
+            <li><strong>device_platform:</strong> Windows-11-10.0.22631-SP0</li>
+        
+            <li><strong>architecture:</strong> 64bit</li>
+        
+            <li><strong>python_version:</strong> 3.12.5</li>
+        
+            <li><strong>pandas_version:</strong> 2.3.3</li>
+        
+            <li><strong>pandera_version:</strong> 0.30.1</li>
+        
+            <li><strong>datachecker_version:</strong> 1.0.2</li>
+        
+        </ul>
+        <h2>QA Log</h2>
+        <table>
+        <thead>
+            <tr>
+            
+            <th>timestamp</th>
+            
+            <th>description</th>
+            
+            <th>outcome</th>
+            
+            <th>failing_ids</th>
+            
+            <th>number_failing</th>
+            
+            <th>status</th>
+            
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Dataframe columns missing from schema</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Schema keys not in dataframe</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>warning</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking for unused arguments in schema</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>warning</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking column names</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking column names are lowercase</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>warning</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking mandatory columns are present</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking for unexpected columns</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>warning</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking age is data type float64</td>
+            
+            <td>❌ fail</td>
+            
+            <td>['int64']</td>
+            
+            <td>1</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking age greater than or equal to 0</td>
+            
+            <td>❌ fail</td>
+            
+            <td>[3]</td>
+            
+            <td>1</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking age less than or equal to 120</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking name string length less than or equal to 10</td>
+            
+            <td>❌ fail</td>
+            
+            <td>[2, 4]</td>
+            
+            <td>2</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking name string matches pattern '^[A-Za-z\s]+$'</td>
+            
+            <td>❌ fail</td>
+            
+            <td>[4]</td>
+            
+            <td>1</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking name string length greater than or equal to 2</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking name is data type str</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking email string matches pattern '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'</td>
+            
+            <td>❌ fail</td>
+            
+            <td>[2]</td>
+            
+            <td>1</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking email string length greater than or equal to 5</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking email string length less than or equal to 50</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking email is data type str</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking sex contains only ['M', 'F', 'X']</td>
+            
+            <td>❌ fail</td>
+            
+            <td>[3]</td>
+            
+            <td>1</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking sex is data type str</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking is_active is data type bool</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+            <tr>
+            
+            <td>13:46:30</td>
+            
+            <td>Checking for duplicate rows in the dataframe</td>
+            
+            <td>✅ pass</td>
+            
+            <td>[]</td>
+            
+            <td>0</td>
+            
+            <td>error</td>
+            
+            </tr>
+            
+        </tbody>
+        </table>
+      </div>
+      <script>
+        const btn = document.getElementById('toggle-dark');
+        btn.addEventListener('click', function() {
+          document.body.classList.toggle('dark-mode');
+        });
+      </script>
+    </body>
+    </html>

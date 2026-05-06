@@ -108,57 +108,57 @@ def string_length(max_length: int = None, min_length: int = None, library=pa):
     return library.Check.str_length(max_value=max_length, min_value=min_length)
 
 
-def allowed_strings(value: list | str, library=pa):
+def allowed_values(value: list | str, library=pa):
     """
-    Create a pandera check for allowed strings.
+    Create a pandera check for allowed values.
 
     Parameters
     ----------
     value : list | str
-        The list of allowed strings or regex pattern.
+        The list of allowed values or regex pattern.
 
     Returns
     -------
     get_dtype_lib().Check
-        A pandera check for the allowed strings.
+        A pandera check for the allowed values.
     """
     if isinstance(value, str):
         return library.Check.str_matches(value)
     elif isinstance(value, list):
         return library.Check.isin(value)
     else:
-        raise TypeError("allowed_strings value must be a list or string")
+        raise TypeError("allowed_values value must be a list or string")
 
 
-def forbidden_strings(value: list, library=pa):
+def forbidden_values(value: list, library=pa):
     """
-    Create a pandera check for forbidden strings.
+    Create a pandera check for forbidden values.
 
     Parameters
     ----------
     value : list | str
-        The list of forbidden strings.
+        The list of forbidden values.
 
     Returns
     -------
     get_dtype_lib().Check
-        A pandera check for the forbidden strings.
+        A pandera check for the forbidden values.
 
     Raises
     ------
     TypeError
-        If the value is a string. Regex is not supported for forbidden_strings or general
+        If the value is a string. Regex is not supported for forbidden_values or general
         TypeError if value is not a list or string.
     """
     if isinstance(value, list):
         return library.Check.notin(value)
     if isinstance(value, str):
         raise TypeError(
-            "String patterns are not supported for forbidden_strings, "
-            "please use either a list or a regex pattern in allowed_strings."
+            "String patterns are not supported for forbidden_values, "
+            "please use either a list or a regex pattern in allowed_values."
         )
     else:
-        raise TypeError("forbidden_strings value must be a list or string")
+        raise TypeError("forbidden_values value must be a list or string")
 
 
 def min_decimal(value: int, library=pa):
@@ -299,16 +299,16 @@ def convert_schema(schema: dict, df, custom_checks: dict = None) -> pa.DataFrame
             checks.append(string_length(min_length=constraints["min_length"], library=library))
         if "max_length" in constraints:
             checks.append(string_length(max_length=constraints["max_length"], library=library))
-        if "allowed_strings" in constraints:
+        if "allowed_values" in constraints:
             warnings.warn(
-                "Regex patterns are not supported for allowed_strings in pyspark, "
-                "please use a list of allowed strings instead.",
+                "Regex patterns are not supported for allowed_values in pyspark, "
+                "please use a list of allowed values instead.",
                 UserWarning,
                 stacklevel=2,
             )
-            checks.append(allowed_strings(constraints["allowed_strings"], library=library))
-        if "forbidden_strings" in constraints:
-            checks.append(forbidden_strings(constraints["forbidden_strings"], library=library))
+            checks.append(allowed_values(constraints["allowed_values"], library=library))
+        if "forbidden_values" in constraints:
+            checks.append(forbidden_values(constraints["forbidden_values"], library=library))
         if "min_decimal" in constraints:
             checks.append(min_decimal(constraints["min_decimal"], library=library))
         if "max_decimal" in constraints:
