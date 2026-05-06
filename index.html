@@ -1030,30 +1030,6 @@ This will then directly validate your dataset and produce a log. If your schema 
 <td>Checks that all values are below or equal to the maximum value</td>
 </tr>
 <tr>
-<td>character</td>
-<td>Minimum length</td>
-<td>min_length</td>
-<td>Checks that all strings have length are above or equal to the minimum length</td>
-</tr>
-<tr>
-<td>character</td>
-<td>Maximum length</td>
-<td>max_length</td>
-<td>Checks that all strings have length below or equal to the maximum length</td>
-</tr>
-<tr>
-<td>character</td>
-<td>allowed strings</td>
-<td>allowed_strings</td>
-<td>Validates that entries match a set of permitted values, list or regex can be used. (Optional and can use forbidden strings instead)</td>
-</tr>
-<tr>
-<td>any</td>
-<td>Missing values check</td>
-<td>allow_na</td>
-<td>Checks for missing or NA values in the column.</td>
-</tr>
-<tr>
 <td>double</td>
 <td>Minimum decimal places</td>
 <td>min_decimal</td>
@@ -1067,9 +1043,33 @@ This will then directly validate your dataset and produce a log. If your schema 
 </tr>
 <tr>
 <td>character</td>
-<td>forbidden strings</td>
-<td>forbidden_strings</td>
-<td>Validates that entries do not contain a set of forbidden values, list can be used. (Optional and can use allowed strings instead. Does not support regex to use regex we recommend using allowed_characters. A TypeError message will be provided with further details)</td>
+<td>Minimum length</td>
+<td>min_length</td>
+<td>Checks that all strings have length are above or equal to the minimum length</td>
+</tr>
+<tr>
+<td>character</td>
+<td>Maximum length</td>
+<td>max_length</td>
+<td>Checks that all strings have length below or equal to the maximum length</td>
+</tr>
+<tr>
+<td>any</td>
+<td>allowed values</td>
+<td>allowed_values</td>
+<td>Validates that entries match a set of permitted values, list or regex can be used. (Optional and can use forbidden values instead)</td>
+</tr>
+<tr>
+<td>any</td>
+<td>forbidden values</td>
+<td>forbidden_values</td>
+<td>Validates that entries do not contain a set of forbidden values, list can be used. (Optional and can use allowed values instead. Does not support regex to use regex we recommend using allowed_characters. A TypeError message will be provided with further details)</td>
+</tr>
+<tr>
+<td>any</td>
+<td>Missing values check</td>
+<td>allow_na</td>
+<td>Checks for missing or NA values in the column.</td>
 </tr>
 <tr>
 <td>date / datetime</td>
@@ -1173,25 +1173,25 @@ Then when creating your <code>DataValidator</code> object, simply pass this as a
 <td style="text-align: center;">✓</td>
 </tr>
 <tr>
-<td>Allowed strings (using lists)</td>
+<td>Allowed values (using lists)</td>
 <td style="text-align: center;">✓</td>
 <td style="text-align: center;">✓</td>
 <td style="text-align: center;">✓</td>
 </tr>
 <tr>
-<td>Allowed strings (using regex)</td>
+<td>Allowed values (using regex)</td>
 <td style="text-align: center;">✓</td>
 <td style="text-align: center;">✓</td>
 <td style="text-align: center;">✗</td>
 </tr>
 <tr>
-<td>Forbidden strings (using lists)</td>
+<td>Forbidden values (using lists)</td>
 <td style="text-align: center;">✓</td>
 <td style="text-align: center;">✓</td>
 <td style="text-align: center;">✓</td>
 </tr>
 <tr>
-<td>Forbidden strings (using regex)</td>
+<td>Forbidden values (using regex)</td>
 <td style="text-align: center;">✗</td>
 <td style="text-align: center;">✗</td>
 <td style="text-align: center;">✗</td>
