@@ -1,6 +1,6 @@
 import pandas as pd
 
-from datachecker import DataValidator
+from onsdatachecker import DataValidator
 
 
 class TestCheckDuplicates:
@@ -31,6 +31,18 @@ class TestCheckDuplicates:
 
     def test__check_duplicates_found(self):
         validator = DataValidator(schema=self.schema, data=self.df, file=None, format=None)
+        validator._check_duplicates()
+        dupe_log_entry = [
+            entry
+            for entry in validator.log[1:]
+            if "Checking for duplicate rows in the dataframe" in entry["description"]
+        ][0]
+        assert dupe_log_entry["outcome"] == "fail"
+
+    def test__check_duplicates_with_subset(self):
+        self.schema["duplicates_columns"] = ["sex"]
+        df_no_dupe = self.df[0:3]
+        validator = DataValidator(schema=self.schema, data=df_no_dupe, file=None, format=None)
         validator._check_duplicates()
         dupe_log_entry = [
             entry

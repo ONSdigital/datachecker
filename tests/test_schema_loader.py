@@ -1,4 +1,4 @@
-from datachecker.checks_loaders_and_exporters.schema_loader import SchemaLoader
+from onsdatachecker.checks_loaders_and_exporters.schema_loader import SchemaLoader
 
 
 class TestSchemaLoader:

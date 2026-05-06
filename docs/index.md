@@ -1,16 +1,34 @@
-# Datachecker
+# onsdatachecker
 
 ## Quickstart 
-
+### Installing from Github
+It is not recommended to install specific requirements via Github, instead use the [PyPI install method](#Installing-from-PyPI) 
 ```Bash
-pip install git+https://github.com/ONSdigital/datachecker.git
+pip install git+https://github.com/ONSdigital/onsdatachecker.git
 ```
-create a schema for your dataset (either in python or read in the supported formats).
-Load in your dataset.
-Create a new validator object using 
+### Installing from PyPI
+
+```bash
+pip install onsdatachecker
+
+# To install polars support from PyPI
+pip install onsdatachecker[polars]
+
+# To install pyspark support from github
+pip install onsdatachecker[pyspark]
+```
+!!! note 
+    Pyspark support does not install the pyspark package, due to ONS DAP having a different install for pyspark.
+You may need to install this separately, but shouldn't be needed for ONS colleagues working in DAP.
+For networked laptops you will need to install pyspark as usual (`pip install pyspark[connect]`)
+
+### Running checks
+
+Next create a schema for your dataset (either in python or read in the supported formats).
+Load in your dataset and then create a new validator object using: 
 
 ```python
-from datachecker import check_and_export
+from onsdatachecker import check_and_export
 validator = check_and_export(
     df=dataframe,
     schema="path/to_schema.json",
@@ -29,13 +47,13 @@ These checks can be included in the lists for individual columns in your schema,
 |---------------|---------------|---------------|-----------------------------|
 | integer / double | Minimum value          | min_val           | Checks that all values are above or equal to the minimum value                                                                             |
 | integer / double | Maximum value          | max_val           | Checks that all values are below or equal to the maximum value                                                                             |
-| character        | Minimum length         | min_length        | Checks that all strings have length are above or equal to the minimum length                                                               |
-| character        | Maximum length         | max_length        | Checks that all strings have length below or equal to the maximum length                                                                   |
-| character        | allowed strings        | allowed_strings   | Validates that entries match a set of permitted values, list or regex can be used. (Optional and can use forbidden strings instead)        |
-| any              | Missing values check   | allow_na          | Checks for missing or NA values in the column.                                                                                             |
 | double           | Minimum decimal places | min_decimal       | Checks that all values have more or equal amounts of decimal places                                                                        |
 | double           | Maximum decimal places | max_decimal       | Checks that all values have less or equal amounts of decimal places                                                                        |
-| character        | forbidden strings      | forbidden_strings | Validates that entries do not contain a set of forbidden values, list can be used. (Optional and can use allowed strings instead. Does not support regex to use regex we recommend using allowed_characters. A TypeError message will be provided with further details) |
+| character        | Minimum length         | min_length        | Checks that all strings have length are above or equal to the minimum length                                                               |
+| character        | Maximum length         | max_length        | Checks that all strings have length below or equal to the maximum length                                                                   |
+| any        | allowed values        | allowed_values   | Validates that entries match a set of permitted values, list or regex can be used. (Optional and can use forbidden values instead)        |
+| any        | forbidden values      | forbidden_values | Validates that entries do not contain a set of forbidden values, list can be used. (Optional and can use allowed values instead. Does not support regex to use regex we recommend using allowed_characters. A TypeError message will be provided with further details) |
+| any              | Missing values check   | allow_na          | Checks for missing or NA values in the column.                                                                                             |
 | date / datetime  | Minimum Date           | min_date          | Checks that all dates are after the minimum date using the format “YYYY-MM-DD”                                                             |
 | date / datetime  | Maximum Date           | max_date          | Checks that all dates are before the maximum date using the format “YYYY-MM-DD”                                                            |
 | date/ datetime   | Minimum Datetime       | min_datetime      | Checks that all dates are after the minimum datetime. Accepted formats: Y, YM, YMD, YMDH, YMDHM and YMDHMS                                 |
@@ -75,7 +93,7 @@ new_validator.validate()
 
 [lambda-functions]: https://realpython.com/python-lambda/
 
-# Pandas, Polars and PySpark Check Status
+## Pandas, Polars and PySpark Check Status
 
 | Check       | Pandas | Polars | PySpark |
 |-------------|:-----------------:|:-------------:|:------------:| 
@@ -83,10 +101,10 @@ new_validator.validate()
 | Maximum value                   | ✓ | ✓ | ✓ |
 | Minimum length                  | ✓ | ✓ | ✓ |
 | Maximum length                  | ✓ | ✓ | ✓ |
-| Allowed strings (using lists)   | ✓ | ✓ | ✓ |
-| Allowed strings (using regex)   | ✓ | ✓ | ✗ |
-| Forbidden strings (using lists) | ✓ | ✓ | ✓ |
-| Forbidden strings (using regex) | ✗ | ✗ | ✗ |
+| Allowed values (using lists)   | ✓ | ✓ | ✓ |
+| Allowed values (using regex)   | ✓ | ✓ | ✗ |
+| Forbidden values (using lists) | ✓ | ✓ | ✓ |
+| Forbidden values (using regex) | ✗ | ✗ | ✗ |
 | Minimum decimal places          | ✓ | ✗ | ✗ |
 | Maximum decimal places          | ✓ | ✗ | ✗ |
 | Minimum Date / Datetime         | ✓ | ✓ | ✓ |

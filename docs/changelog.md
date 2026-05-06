@@ -8,13 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Removed 
+
+### Fixed 
+
+## [2.0.0] - 2026-05-06
+
+### Added
 - Checks for duplicates and completeness
 - Support for polars
 - Support for PySpark
+- Option to give duplicate checks column subset
 
 ### Changed
 - Class structure (users are not impacted by change)
-
+- replaced allowed_strings with allowed_values which will now work for all data types (this would have worked previously but new name reflects this better)
+- replaced forbidden_strings with forbidden_values as above
 
 ### Removed
 - Type checking when creating checks for pandera schema (checking column type is unaffected)

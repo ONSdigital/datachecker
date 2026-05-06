@@ -2,7 +2,7 @@ import time
 
 import pandas as pd
 
-from datachecker import DataValidator, check_and_export
+from onsdatachecker import DataValidator, check_and_export
 
 tic = time.time()
 schema = {
@@ -16,7 +16,7 @@ schema = {
             "max_length": 10,
             "allow_na": False,
             "optional": False,
-            "allowed_strings": r"^[A-Za-z\s]+$",
+            "allowed_values": r"^[A-Za-z\s]+$",
         },
         "email": {
             "type": str,
@@ -24,12 +24,12 @@ schema = {
             "max_length": 50,
             "allow_na": False,
             "optional": False,
-            "allowed_strings": r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+            "allowed_values": r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
         },
         "is_active": {"type": bool, "allow_na": False, "optional": False},
         "sex": {
             "type": str,
-            "allowed_strings": ["M", "F", "X"],
+            "allowed_values": ["M", "F", "X"],
             "allow_na": False,
             "optional": False,
         },

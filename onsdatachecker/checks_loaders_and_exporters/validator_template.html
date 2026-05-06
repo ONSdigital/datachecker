@@ -1,0 +1,110 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>{{ name }}</title>
+      <style>
+        body {
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 16px;
+          line-height: 1.5;
+          margin: 0;
+          padding: 0;
+          background-color: #fff;
+          color: #222;
+          transition: background-color 0.3s, color 0.3s;
+        }
+        header {
+          background-color: #f8f9fa;
+          padding: 1rem;
+          text-align: center;
+          transition: background-color 0.3s;
+        }
+        main {
+          padding: 1rem;
+        }
+        .container {
+          margin-left: 20px;
+          margin-right: 20px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 1rem;
+        }
+        th, td {
+          border: 1px solid #ddd;
+          padding: 0.5rem;
+          text-align: left;
+        }
+        th {
+          background-color: #f2f2f2;
+          transition: background-color 0.3s;
+        }
+        .no-bullets {
+          list-style-type: none;
+          padding-left: 0;
+          margin: 0;
+        }
+        .no-bullets li {
+          margin-bottom: 0.25rem;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+          background-color: #181a1b;
+          color: #e0e0e0;
+        }
+        body.dark-mode header {
+          background-color: #23272b;
+        }
+        body.dark-mode th {
+          background-color: #23272b;
+        }
+        body.dark-mode td, body.dark-mode table {
+          border-color: #444;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <header>
+          <h1>QA Log</h1>
+          <button id="toggle-dark" style="float:right; margin-top:-2.5rem; margin-right:1rem;">Toggle Dark Mode</button>
+        </header>
+        <br>
+        <h2>System Information</h2>
+        <ul class="no-bullets">
+        {% for key, value in sys_info.items() %}
+            <li><strong>{{ key }}:</strong> {{ value }}</li>
+        {% endfor %}
+        </ul>
+        <h2>QA Log</h2>
+        <table>
+        <thead>
+            <tr>
+            {% for col in columns %}
+            <th>{{ col }}</th>
+            {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+            {% for cell in row %}
+            <td>{{ cell }}</td>
+            {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+      </div>
+      <script>
+        const btn = document.getElementById('toggle-dark');
+        btn.addEventListener('click', function() {
+          document.body.classList.toggle('dark-mode');
+        });
+      </script>
+    </body>
+    </html>

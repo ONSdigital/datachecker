@@ -1,6 +1,6 @@
-site_name: datachecker
-repo_url: https://github.com/ONSdigital/datachecker
-repo_name: datachecker
+site_name: onsdatachecker
+repo_url: https://github.com/ONSdigital/onsdatachecker
+repo_name: onsdatachecker
 site_description: A Python package for validating datasets against predefined checks.
 nav:
   - Home: index.md

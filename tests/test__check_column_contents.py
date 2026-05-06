@@ -2,7 +2,7 @@ import pandas as pd
 import pandera.pandas as pa
 import pytest
 
-from datachecker.data_checkers.pandas_validator import DataValidator
+from onsdatachecker.data_checkers.pandas_validator import DataValidator
 
 
 @pytest.fixture(scope="class")

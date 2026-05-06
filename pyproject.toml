@@ -1,7 +1,7 @@
 [project]
 name = "onsdatachecker"
 description = "A lightweight data checker for pandas, polars or pyspark built using pandera"
-version = "1.0.2"
+version = "2.0.0"
 authors = [
     {"name" = "ONS"}
 ]
@@ -13,7 +13,6 @@ classifiers = [
     "Programming Language :: Python :: 3.12"
 ]
 dependencies = [
-    "findspark",
     "pyyaml",
     "pandas<3.0.0",
     "tomli",
@@ -24,13 +23,13 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
-    "datachecker",
-    "datachecker.checks_loaders_and_exporters",
-    "datachecker.data_checkers"
+    "onsdatachecker",
+    "onsdatachecker.checks_loaders_and_exporters",
+    "onsdatachecker.data_checkers"
 ]
 
 [tool.bumpversion]
-current_version = "1.0.2"
+current_version = "2.0.0"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
@@ -56,6 +55,7 @@ dev = [
     "pre-commit",
     "polars",
     "pyarrow",
+    "findspark",
     "grpcio"
 ]
 docs = [

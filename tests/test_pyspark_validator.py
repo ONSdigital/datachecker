@@ -1,7 +1,6 @@
 import importlib.util
 import os
 
-import pandas as pd
 import pytest
 
 
@@ -22,17 +21,15 @@ class TestPysparkValidator:
     def test_pyspark_validator(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
-        df = pd.DataFrame(
-            {
-                "id": [1, 2, 3, 2],
-                "name": ["Alice", "Bob", "Charlie", "Bob"],
-                "score": [90.5, 82.0, 95.25, 82.0],
-                "passed": [True, True, True, True],
-            }
-        )
-        spark_df = self.spark.createDataFrame(df)
+        data = [
+            {"id": 1, "name": "Alice", "score": 90.5, "passed": True},
+            {"id": 2, "name": "Bob", "score": 82.0, "passed": True},
+            {"id": 3, "name": "Charlie", "score": 95.25, "passed": True},
+            {"id": 2, "name": "Bob", "score": 82.0, "passed": True},
+        ]
+        spark_df = self.spark.createDataFrame(data)
         spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
         spark_df = spark_df.withColumn("name", spark_df["name"].cast(T.StringType()))
         spark_df = spark_df.withColumn("score", spark_df["score"].cast(T.FloatType()))
@@ -65,19 +62,43 @@ class TestPysparkValidator:
     def test_pyspark_all_dtypes_fails(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
-        df = pd.DataFrame(
+        data = [
             {
-                "id": [-1, 2, 3, 4],
-                "name": ["Alice", "Bob", "Charlie", "Daniel"],
-                "score": [90.5, 82.0, 95.2, 82.0],
-                "passed": [True, True, True, True],
-                "date": ["2022-12-01", "2023-01-02", "2023-01-03", "2023-01-04"],
-                "comments": ["Good", "Average", "Excellent", "Average"],
-            }
-        )
-        spark_df = self.spark.createDataFrame(df)
+                "id": -1,
+                "name": "Alice",
+                "score": 90.5,
+                "passed": True,
+                "date": "2022-12-01",
+                "comments": "Good",
+            },
+            {
+                "id": 2,
+                "name": "Bob",
+                "score": 82.0,
+                "passed": True,
+                "date": "2023-01-02",
+                "comments": "Average",
+            },
+            {
+                "id": 3,
+                "name": "Charlie",
+                "score": 95.2,
+                "passed": True,
+                "date": "2023-01-03",
+                "comments": "Excellent",
+            },
+            {
+                "id": 4,
+                "name": "Daniel",
+                "score": 82.0,
+                "passed": True,
+                "date": "2023-01-04",
+                "comments": "Average",
+            },
+        ]
+        spark_df = self.spark.createDataFrame(data)
         spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
         spark_df = spark_df.withColumn("name", spark_df["name"].cast(T.StringType()))
         spark_df = spark_df.withColumn("score", spark_df["score"].cast(T.FloatType()))
@@ -100,8 +121,8 @@ class TestPysparkValidator:
                     "allow_na": False,
                     "optional": False,
                     "max_length": 10,
-                    # allowed strings not working for pyspark with regex
-                    "allowed_strings": ["Alice", "Bob", "Charlie", "Daniel"],
+                    # allowed values not working for pyspark with regex
+                    "allowed_values": ["Alice", "Bob", "Charlie", "Daniel"],
                 },
                 "score": {
                     "type": "float",
@@ -156,14 +177,15 @@ class TestPysparkValidator:
     def test_pyspark_validate_boilerplate_checks(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
-        df = pd.DataFrame(
-            {
-                "id": [1, 2, 7, 5],
-            }
-        )
-        spark_df = self.spark.createDataFrame(df)
+        data = [
+            {"id": 1},
+            {"id": 2},
+            {"id": 7},
+            {"id": 5},
+        ]
+        spark_df = self.spark.createDataFrame(data)
         spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
 
         schema = {
@@ -194,16 +216,16 @@ class TestPysparkValidator:
     def test_pyspark_validate_check_duplicates_fail(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
-        df = pd.DataFrame(
-            {
-                "id": [1, 2, 7, 5, 7],
-                "name": ["Alice", "Bob", "Charlie", "David", "Charlie"],
-                "score": [90.5, 82.0, 95.25, 88.0, 95.25],
-            }
-        )
-        spark_df = self.spark.createDataFrame(df)
+        data = [
+            {"id": 1, "name": "Alice", "score": 90.5},
+            {"id": 2, "name": "Bob", "score": 82.0},
+            {"id": 7, "name": "Charlie", "score": 95.25},
+            {"id": 5, "name": "David", "score": 88.0},
+            {"id": 7, "name": "Charlie", "score": 95.25},
+        ]
+        spark_df = self.spark.createDataFrame(data)
         spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
         spark_df = spark_df.withColumn("name", spark_df["name"].cast(T.StringType()))
         spark_df = spark_df.withColumn("score", spark_df["score"].cast(T.FloatType()))
@@ -249,16 +271,15 @@ class TestPysparkValidator:
     def test_pyspark_validate_check_duplicates_pass(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
-        df = pd.DataFrame(
-            {
-                "id": [1, 2, 7, 5],
-                "name": ["Alice", "Bob", "Charlie", "David"],
-                "score": [90.5, 82.0, 95.25, 88.0],
-            }
-        )
-        spark_df = self.spark.createDataFrame(df)
+        data = [
+            {"id": 1, "name": "Alice", "score": 90.5},
+            {"id": 2, "name": "Bob", "score": 82.0},
+            {"id": 7, "name": "Charlie", "score": 95.25},
+            {"id": 5, "name": "David", "score": 88.0},
+        ]
+        spark_df = self.spark.createDataFrame(data)
         spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
         spark_df = spark_df.withColumn("name", spark_df["name"].cast(T.StringType()))
         spark_df = spark_df.withColumn("score", spark_df["score"].cast(T.FloatType()))
@@ -295,10 +316,15 @@ class TestPysparkValidator:
     def test_pyspark_validate_check_completeness_pass(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
-        df = pd.DataFrame({"id": [1, 2, 3, 4], "age": [10, 20, 10, 20], "sex": ["M", "M", "F", "F"]})
-        spark_df = self.spark.createDataFrame(df)
+        data = [
+            {"id": 1, "age": 10, "sex": "M"},
+            {"id": 2, "age": 20, "sex": "M"},
+            {"id": 3, "age": 10, "sex": "F"},
+            {"id": 4, "age": 20, "sex": "F"},
+        ]
+        spark_df = self.spark.createDataFrame(data)
         spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
         spark_df = spark_df.withColumn("age", spark_df["age"].cast(T.IntegerType()))
         spark_df = spark_df.withColumn("sex", spark_df["sex"].cast(T.StringType()))
@@ -325,11 +351,14 @@ class TestPysparkValidator:
     def test_pyspark_validate_check_completeness_fail(self):
         import pyspark.sql.types as T
 
-        from datachecker.data_checkers.pyspark_validator import PySparkValidator
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
 
-        df = pd.DataFrame({"id": [1, 2, 3, 4], "age": [10, 20, 10, 20], "sex": ["M", "M", "F", "F"]})
-        df_dropped_row = df.iloc[0:3]  # Remove one row to create incompleteness
-        spark_df = self.spark.createDataFrame(df_dropped_row)
+        data = [
+            {"id": 1, "age": 10, "sex": "M"},
+            {"id": 2, "age": 20, "sex": "M"},
+            {"id": 3, "age": 10, "sex": "F"},
+        ]
+        spark_df = self.spark.createDataFrame(data)
         spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
         spark_df = spark_df.withColumn("age", spark_df["age"].cast(T.IntegerType()))
         spark_df = spark_df.withColumn("sex", spark_df["sex"].cast(T.StringType()))

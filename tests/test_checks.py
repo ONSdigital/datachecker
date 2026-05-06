@@ -2,8 +2,8 @@ import pandas as pd
 import pandera.pandas as pa
 import pytest
 
-from datachecker.checks_loaders_and_exporters.checks import convert_schema, validate_using_pandera
-from datachecker.data_checkers.pandas_validator import DataValidator
+from onsdatachecker.checks_loaders_and_exporters.checks import convert_schema, validate_using_pandera
+from onsdatachecker.data_checkers.pandas_validator import DataValidator
 
 
 def test_convert_schema():
@@ -16,11 +16,18 @@ def test_convert_schema():
                 "optional": True,
                 "min_length": 1,
                 "max_length": 10,
-                "allowed_strings": ["M", "F"],
+                "allowed_values": ["M", "F"],
+            },
+            "code": {
+                "type": int,
+                "optional": True,
+                "allowed_values": [1, 2],
             },
         }
     }
-    df = pd.DataFrame({"id": [-10, 50, 101], "age": [25.0, 120.0, -1.0], "sex": ["M", "F", "X"]})
+    df = pd.DataFrame(
+        {"id": [-10, 50, 101], "age": [25.0, 120.0, -1.0], "sex": ["M", "F", "X"], "code": [1, 2, 3]}
+    )
 
     schema_obj = convert_schema(schema_dict, df)
 
@@ -28,7 +35,7 @@ def test_convert_schema():
         schema_obj.validate(df, lazy=True)
     except pa.errors.SchemaErrors as e:
         failed_validations = e.failure_cases[["column", "check", "failure_case", "index"]]
-        assert failed_validations.shape == (4, 4)
+        assert failed_validations.shape == (5, 4)
 
 
 def test_validate_allow_na():
@@ -69,7 +76,7 @@ def test_adding_passing_data_checks():
                 "type": str,
                 "min_length": 1,
                 "max_length": 10,
-                "allowed_strings": ["M", "F"],
+                "allowed_values": ["M", "F"],
             },
         }
     }
@@ -79,7 +86,7 @@ def test_adding_passing_data_checks():
     # ID data check should fail
     # id: 3 checks, type min and max
     # age: 3 checks, type min and max
-    # sex: 4 checks, type, min_length, max_length, allowed_strings
+    # sex: 4 checks, type, min_length, max_length, allowed_values
     # age and sex data checks should pass
     result = validate_using_pandera(schema_obj, df)
 
@@ -97,7 +104,7 @@ class TestStringChecks:
                 "code": {
                     "type": str,
                     "optional": True,
-                    "allowed_strings": r"^[A-Z][0-9]$",
+                    "allowed_values": r"^[A-Z][0-9]$",
                 },
             }
         }
@@ -115,7 +122,7 @@ class TestStringChecks:
                 "code": {
                     "type": str,
                     "optional": True,
-                    "allowed_strings": 2,
+                    "allowed_values": 2,
                 },
             }
         }
@@ -123,7 +130,7 @@ class TestStringChecks:
         try:
             convert_schema(schema_dict, df)
         except TypeError as e:
-            assert str(e) == "allowed_strings value must be a list or string"
+            assert str(e) == "allowed_values value must be a list or string"
 
     def test_converting_forbidden_string_general_type_error(self):
         schema_dict = {
@@ -131,7 +138,7 @@ class TestStringChecks:
                 "code": {
                     "type": str,
                     "optional": True,
-                    "forbidden_strings": 2,
+                    "forbidden_values": 2,
                 },
             }
         }
@@ -140,7 +147,7 @@ class TestStringChecks:
         try:
             convert_schema(schema_dict, df)
         except TypeError as e:
-            assert str(e) == "forbidden_strings value must be a list or string"
+            assert str(e) == "forbidden_values value must be a list or string"
 
     def test_forbidden_string_raise_regex_error(self):
         schema_dict = {
@@ -148,7 +155,7 @@ class TestStringChecks:
                 "code": {
                     "type": str,
                     "optional": True,
-                    "forbidden_strings": r"^[a-z][0-9]$",
+                    "forbidden_values": r"^[a-z][0-9]$",
                 },
             }
         }
@@ -157,8 +164,8 @@ class TestStringChecks:
             convert_schema(schema_dict, df)
         except TypeError as e:
             assert str(e) == (
-                "String patterns are not supported for forbidden_strings, "
-                "please use either a list or a regex pattern in allowed_strings."
+                "String patterns are not supported for forbidden_values, "
+                "please use either a list or a regex pattern in allowed_values."
             )
 
     def test_forbidden_string_list(self):
@@ -167,7 +174,7 @@ class TestStringChecks:
                 "code": {
                     "type": str,
                     "optional": True,
-                    "forbidden_strings": ["A1", "B2", "C3"],
+                    "forbidden_values": ["A1", "B2", "C3"],
                 },
             }
         }

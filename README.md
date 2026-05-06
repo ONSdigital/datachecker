@@ -1,4 +1,4 @@
-# `datachecker`
+# `onsdatachecker`
 
 A Data checker which uses pandera to perform the bulk checks.
 This wrapper can be used to check contents of a dataframe against a pre defined schema
@@ -25,8 +25,38 @@ Whilst in the root folder, in a terminal, you can install the package and its
 Python dependencies using:
 
 ```shell
-pip install git+https://github.com/ONSdigital/datachecker.git
+pip install git+https://github.com/ONSdigital/onsdatachecker.git
 ```
+
+or from PyPI:
+
+```shell
+pip install onsdatachecker
+```
+
+It is not recommended to install specific requirements via Github, instead 
+use the following methods for installing from PyPI 
+
+### Polars support
+
+To install the required packages for polars please run the one of the following commands:
+
+```shell
+# Polars support from PyPI
+pip install onsdatachecker[polars]
+```
+
+### Pyspark support
+
+To install the required packages for pyspark please run the one of the following commands:
+
+```shell
+pip install onsdatachecker[pyspark]
+```
+
+N.B. this does not install the pyspark package, due to ONS DAP having a different install for pyspark.
+You may need to install this separately, but shouldn't be needed for ONS colleagues working in DAP.
+For networked laptops you will need to install pyspark as usual (`pip install pyspark[connect]`)
 
 ## Pre-Defined Checks
 
@@ -38,11 +68,11 @@ These checks can be included in the lists for individual columns in your schema,
 | integer / double | Maximum value          | max_val           | Checks that all values are below or equal to the maximum value                                                                             |
 | character        | Minimum length         | min_length        | Checks that all strings have length are above or equal to the minimum length                                                               |
 | character        | Maximum length         | max_length        | Checks that all strings have length below or equal to the maximum length                                                                   |
-| character        | allowed strings        | allowed_strings   | Validates that entries match a set of permitted values, list or regex can be used. (Optional and can use forbidden strings instead)        |
+| character        | allowed values        | allowed_values   | Validates that entries match a set of permitted values, list or regex can be used. (Optional and can use forbidden values instead)        |
 | any              | Missing values check   | allow_na          | Checks for missing or NA values in the column.                                                                                             |
 | double           | Minimum decimal places | min_decimal       | Checks that all values have more or equal amounts of decimal places                                                                        |
 | double           | Maximum decimal places | max_decimal       | Checks that all values have less or equal amounts of decimal places                                                                        |
-| character        | forbidden strings      | forbidden_strings | Validates that entries do not contain a set of forbidden values, list can be used. (Optional and can use allowed strings instead. Does not support regex to use regex we recommend using allowed_characters. A TypeError message will be provided with further details) |
+| character        | forbidden values      | forbidden_values | Validates that entries do not contain a set of forbidden values, list can be used. (Optional and can use allowed values instead. Does not support regex to use regex we recommend using allowed_characters. A TypeError message will be provided with further details) |
 | date / datetime  | Minimum Date           | min_date          | Checks that all dates are after the minimum date using the format “YYYY-MM-DD”                                                             |
 | date / datetime  | Maximum Date           | max_date          | Checks that all dates are before the maximum date using the format “YYYY-MM-DD”                                                            |
 | date/ datetime   | Minimum Datetime       | min_datetime      | Checks that all dates are after the minimum datetime. Accepted formats: Y, YM, YMD, YMDH, YMDHM and YMDHMS                                 |
@@ -105,8 +135,8 @@ The cookiecutter template generated for each project will follow this folder str
 
 ```shell
 .
-├── datachecker/
-│   └── datachecker/
+├── onsdatachecker/
+│   └── onsdatachecker/
 │       ├── checks_loaders_and_exporters/
 │       │   ├── __init__.py
 │       │   └── checks.py
@@ -136,7 +166,7 @@ Crown copyright and available under the terms of the Open Government 3.0 licence
 
 ## Contributing
 
-If you want to help us build and improve `datachecker`, please take a look at our
+If you want to help us build and improve `onsdatachecker`, please take a look at our
 [contributing guidelines][contributing].
 
 ## Acknowledgements
