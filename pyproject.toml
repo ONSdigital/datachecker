@@ -14,7 +14,7 @@ classifiers = [
 ]
 dependencies = [
     "pyyaml",
-    "pandas<3.0.0",
+    "pandas",
     "tomli",
     "jinja2",
     "pandera>=0.26.1",
@@ -71,6 +71,7 @@ polars = [
     "pyarrow"
 ]
 pyspark = [
+    "pandas<3.0.0",
     "grpcio"
 ]
 
