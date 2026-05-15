@@ -381,3 +381,31 @@ class TestPysparkValidator:
             if "Checking for missing rows in the dataframe columns" in entry["description"]
         ][0]
         assert completeness_entry["outcome"] == "fail"
+
+    def test_failed_cases(self):
+        import pyspark.sql.types as T
+
+        from onsdatachecker.data_checkers.pyspark_validator import PySparkValidator
+
+        data = [
+            {"id": 1, "age": 10, "sex": "M"},
+            {"id": 2, "age": 20, "sex": "M"},
+            {"id": 3, "age": 10, "sex": "F"},
+        ]
+        spark_df = self.spark.createDataFrame(data)
+        spark_df = spark_df.withColumn("id", spark_df["id"].cast(T.IntegerType()))
+        spark_df = spark_df.withColumn("age", spark_df["age"].cast(T.IntegerType()))
+        spark_df = spark_df.withColumn("sex", spark_df["sex"].cast(T.StringType()))
+
+        schema = {
+            "check_completeness": True,
+            "completeness_columns": ["age", "sex"],
+            "columns": {
+                "id": {"type": "int", "allow_na": False},
+                "age": {"type": "int", "allow_na": False},
+                "sex": {"type": "string", "allow_na": False},
+            },
+        }
+        validator = PySparkValidator(schema=schema, data=spark_df, file=None, format=None)
+        with pytest.warns(UserWarning):
+            validator.failed_cases()
