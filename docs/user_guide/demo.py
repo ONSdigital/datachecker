@@ -82,10 +82,14 @@ toc = time.time()
 print(f"Validation completed in {toc - tic:.2f} seconds.")
 
 # Alternative using check_and_export function
-check_and_export(
+validator = check_and_export(
     schema=schema,
     data=df,
     file="output_report_function.html",
     format="html",
     hard_check=False,
 )
+
+# to export failed cases to a CSV file, you can call the
+# `failed_cases` method and then export the resulting DataFrame to CSV:
+validator.failed_cases().to_csv("failed_cases.csv", index=False)

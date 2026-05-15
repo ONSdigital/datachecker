@@ -432,3 +432,14 @@ class Validator(SetupStructure):
             outcome=not unused_keys,
             entry_type="warning",
         )
+
+    def failed_cases(self):
+        failing_ids = [
+            item
+            for entry in self.log[1:]
+            if entry["outcome"] == "fail" and entry["failing_ids"] is not None
+            for item in entry["failing_ids"]
+            if type(item) in [int, float]
+        ]
+        unique_failing_ids = list(set(failing_ids))
+        return unique_failing_ids
