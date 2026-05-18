@@ -32,7 +32,7 @@ def test_failed_cases_index():
         "outcome": "fail",
         "entry_type": "error",
     }
-    failed_cases = validator.failed_cases()
+    failed_cases = validator._id_failed_cases()
     assert failed_cases == [1, 2]
 
 
@@ -51,7 +51,7 @@ def test_failed_cases_no_failing_ids():
         "outcome": "fail",
         "entry_type": "error",
     }
-    failed_cases = validator.failed_cases()
+    failed_cases = validator._id_failed_cases()
     assert failed_cases == []
 
 

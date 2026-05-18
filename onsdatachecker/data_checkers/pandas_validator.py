@@ -59,7 +59,7 @@ class DataValidator(Validator):
             )
 
     def failed_cases(self):
-        unique_failing_ids = super().failed_cases()
+        unique_failing_ids = super()._id_failed_cases()
         if unique_failing_ids:
             failed_cases = self.data.loc[unique_failing_ids]
             return failed_cases

@@ -51,7 +51,7 @@ class PolarsValidator(Validator):
             )
 
     def failed_cases(self):
-        unique_ids = super().failed_cases()
+        unique_ids = super()._id_failed_cases()
         if unique_ids:
             failed_cases = (
                 self.data.with_row_index("_row_nr")

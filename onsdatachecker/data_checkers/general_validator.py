@@ -433,7 +433,7 @@ class Validator(SetupStructure):
             entry_type="warning",
         )
 
-    def failed_cases(self):
+    def _id_failed_cases(self):
         failing_ids = [
             item
             for entry in self.log[1:]
