@@ -20,12 +20,41 @@ class SetupStructure:
     Base class for setting up the structure of validation logs, including methods for
     exporting, printing logs, and adding QA entries.
 
+    methods
+    -------
+    __repr__()
+        Returns a string representation of the log entries.
+    __str__()
+        Returns a formatted string with system information and log entries.
+    export()
+        Exports the log using the specified format and file path.
+    _create_log()
+        Creates the initial log structure with system information.
+    _add_qa_entry(description, failing_ids, outcome, entry_type="info")
+        Adds a QA entry to the log with the specified details.
+
     """
 
     def __repr__(self):
+        """
+        Returns a string representation of the log entries.
+
+        Returns
+        -------
+        str
+            A string representation of the log entries.
+        """
         return self.__str__()
 
     def __str__(self):
+        """
+        Returns a string representation of the log entries.
+
+        Returns
+        -------
+        str
+            A string representation of the log entries.
+        """
         # Create a table header
         sys_info = "\n".join([f"{key}: {value}" for key, value in self.log[0].items()])
         headers = [
@@ -54,10 +83,21 @@ class SetupStructure:
         return log_entries if log_entries else "No log entries."
 
     def export(self):
+        """
+        Exports the object log to the given format.
+        """
         Exporter.export(self.log, self.format, self.file)
         self._hard_check_status()
 
     def _create_log(self):
+        """
+        create log assigned to object
+
+        Returns
+        -------
+        list(dict)
+            A list of dictionaries representing the log entries.
+        """
         sys_info = {
             "date": pd.Timestamp.now().strftime("%Y-%m-%d"),
             "user": getpass.getuser(),
@@ -72,6 +112,25 @@ class SetupStructure:
         return [sys_info]
 
     def _add_qa_entry(self, description, failing_ids, outcome, entry_type="info"):
+        """
+        adds new log entry
+
+        Parameters
+        ----------
+        description : str
+            A description of the QA check.
+        failing_ids : list
+            The IDs of the failing entries.
+        outcome : bool
+            boolean of whether check passed or failed
+        entry_type : str, optional
+            The type of log entry ("info", "error", or "warning"), by default "info"
+
+        Raises
+        ------
+        ValueError
+            If the entry_type is not one of the allowed values.
+        """
         outcome = "pass" if outcome else "fail"
         if entry_type not in ["info", "error", "warning"]:
             raise ValueError("entry_type must be 'info', 'error', or 'warning'.")
