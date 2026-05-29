@@ -30,8 +30,8 @@ class SetupStructure:
         Exports the log using the specified format and file path.
     _create_log()
         Creates the initial log structure with system information.
-    _add_qa_entry(description, failing_ids, outcome, entry_type="info")
-        Adds a QA entry to the log with the specified details.
+    _add_qa_entry(description, outcome, entry_type="info")
+        Adds a QA log entry with a description, outcome, and entry type (default is "info").
 
     """
 
@@ -180,8 +180,6 @@ class Validator(SetupStructure):
         Initializes the Validator with schema, data, file, format, and validation strictness.
     validate()
         Runs a series of validation checks on the data, including column names, types, and contents.
-    add_qa_entry(description, outcome, entry_type="info")
-        Adds a QA log entry with a description, outcome, and entry type (default is "info").
     export()
         Exports the validation log using the specified format and file path.
     __repr__()
@@ -201,6 +199,25 @@ class Validator(SetupStructure):
         hard_check: bool = True,
         custom_checks: dict = None,
     ):
+        """
+        initialise class
+
+        Parameters
+        ----------
+        schema : dict or str
+            The schema or path to schema file to validate against.
+        data : pd.DataFrame
+            The data to be validated.
+        file : str
+            The file path for exporting validation logs.
+        format : str
+            The format to use when exporting logs.
+        hard_check : bool, optional
+            Determines if strict validation is enforced will stop pipeline if error or warning 
+            detected if set to true, by default True
+        custom_checks : dict, optional
+            any custom checks to run, by default None
+        """        
         self.log = self._create_log()
         self.data = data
         self.file = file
@@ -210,6 +227,14 @@ class Validator(SetupStructure):
         self.schema = self._validate_schema(schema)
 
     def validate(self):
+        """
+        performs validation of the input data againsts schema
+
+        Returns
+        -------
+        Validator
+            returns validator object with log of validation checks and outcomes
+        """        
         for check in (
             self._check_colnames,
             self._check_column_contents,
@@ -223,6 +248,19 @@ class Validator(SetupStructure):
         return self
 
     def _validate_and_assign_custom_checks(self, custom_checks):
+        """
+        checks and converts custom checks into format needed for pandera
+
+        Parameters
+        ----------
+        custom_checks : dict
+            dictionary of custom check name: function pairs
+
+        Raises
+        ------
+        TypeError
+            If custom_checks is not a dictionary or if any value in the dictionary is not callable.
+        """        
         if custom_checks is not None:
             if not isinstance(custom_checks, dict):
                 raise TypeError("custom_checks must be a dictionary of check_name: function pairs.")
@@ -232,6 +270,25 @@ class Validator(SetupStructure):
         self.custom_checks = custom_checks
 
     def _validate_schema(self, schema):
+        """
+        checks schema format is correct, loads schema if path to file is given. 
+        performs checks againsts given schema and updates log with status of checks
+
+        Parameters
+        ----------
+        schema : dict or str
+            The schema or path to schema file to validate against.
+
+        Returns
+        -------
+        dict
+            The validated schema.
+
+        Raises
+        ------
+        ValueError
+            If the schema is not a dictionary or a string representing a file path.
+        """        
         if not isinstance(schema, (str, dict)):
             raise ValueError("Schema must be a file path (str) or a loaded schema (dict).")
 
@@ -286,6 +343,15 @@ class Validator(SetupStructure):
         return schema
 
     def _hard_check_status(self):
+        """
+        counts number of warnings and errors in validator log. If count greater than 0
+        and `hard_check` is `True`, raises `ValueError`
+
+        Raises
+        ------
+        ValueError
+            If `hard_check` is `True` and there are any errors in the log.
+        """        
         error_count = 0
         warning_count = 0
         for entry in self.log[1:]:
@@ -315,8 +381,9 @@ class Validator(SetupStructure):
             )
 
     def _format_log_descriptions(self):
-        # Optional method to format log descriptions for better readability
-
+        """
+        format log description for better readability 
+        """        
         regex_replacements = [
             (
                 r"str_length\(\s*(\d+(?:\.\d+)?)\s*,\s*None\s*\)",
@@ -348,9 +415,11 @@ class Validator(SetupStructure):
             entry["description"] = desc
 
     def _convert_frame_wide_check_to_single_entry(self):
-        # Want to take any repeated log entries i.e. custom checks and convert to a single
-        # Log entry with description "Custom data check {check_name}"
-
+        """
+        Converts multiple wide check log entries into a single log entry for better
+        readability
+        Log entry with description "Custom data check {check_name}"
+        """        
         # escape if no custom checks
         if self.custom_checks is None:
             return
@@ -394,6 +463,13 @@ class Validator(SetupStructure):
             )
 
     def _check_colnames(self):
+        """
+        check:
+          - column names do not contain symbols other than underscore or spaces. 
+          - column names all lower case 
+          - columns marked as mandatory are present
+          - no unexpected columns are present
+        """        
         # Check column names do not contain symbols other than underscore or spaces
         invalid_cols = [
             col for col in self.data.columns if not all(c.isalnum() or c in ["_"] for c in col)
@@ -439,6 +515,19 @@ class Validator(SetupStructure):
         )
 
     def _check_column_contents(self, converted_schema=None):
+        """
+        main method for validatating column contents based on schema
+
+        Parameters
+        ----------
+        converted_schema : _type_, optional
+            optional point to pass schema used in unit testing, by default None
+
+        Returns
+        -------
+        Validator
+            validator object with updated log with status of checks
+        """        
         # code to pass through converted schema. helps unit testing
         if converted_schema is None:
             converted_schema = convert_schema(self.schema, self.data, self.custom_checks)
@@ -462,6 +551,15 @@ class Validator(SetupStructure):
                 )
 
     def _check_unused_schema_arguments(self, schema):
+        """
+        checks schema keys are valid. Will add log entry if schema arguments are 
+        unused. 
+
+        Parameters
+        ----------
+        schema : dict
+            schema for checks
+        """        
         # Unused arguments in schema.
         valid_schema_keys = {
             "type",
