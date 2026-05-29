@@ -1,4 +1,4 @@
-from itertools import product
+import math
 
 import pandas as pd
 
@@ -42,11 +42,11 @@ class DataValidator(Validator):
         if self.schema.get("check_completeness", False):
             cols_to_check = self.schema.get("completeness_columns", self.data.columns.tolist())
             # Generate all possible combinations of the column values
-            unique_values = [self.data[col].dropna().unique() for col in cols_to_check]
-            combinations = set(product(*unique_values))
-            existing_combinations = set(map(tuple, self.data[cols_to_check].dropna().values))
-            missing_combinations = combinations - existing_combinations
-            result = len(missing_combinations) == 0
+            expected_combinations = [self.data[col].dropna().nunique() for col in cols_to_check]
+            expected_number_of_combinations = math.prod(expected_combinations)
+            number_existing_combinations = len(self.data[cols_to_check].drop_duplicates())
+            missing_combinations = expected_number_of_combinations - number_existing_combinations
+            result = missing_combinations == 0
             if len(cols_to_check) > 4:
                 cols_to_check = cols_to_check[:4] + ["..."]
             formatted_cols_to_check = ", ".join(cols_to_check)
