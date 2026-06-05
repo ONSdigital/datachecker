@@ -99,7 +99,8 @@ class SetupStructure:
         self.log.append(log_entry)
 
     def _format_log(self):
-        # Optional method to format log entries for better readability
+        # Method to format log entries for better readability,
+        # Formats entries with more than 10 failing ids and shows the first 10 only.
         log_copy = copy.deepcopy(self.log)
         for entry in log_copy[1:]:
             if len(entry.get("failing_ids", [])) > 10:
