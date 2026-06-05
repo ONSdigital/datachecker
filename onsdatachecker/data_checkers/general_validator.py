@@ -1,3 +1,4 @@
+import copy
 import getpass
 import platform
 import re
@@ -27,7 +28,8 @@ class SetupStructure:
 
     def __str__(self):
         # Create a table header
-        sys_info = "\n".join([f"{key}: {value}" for key, value in self.log[0].items()])
+        copy_log = self._format_log()
+        sys_info = "\n".join([f"{key}: {value}" for key, value in copy_log[0].items()])
         headers = [
             "Timestamp",
             "Status",
@@ -40,7 +42,7 @@ class SetupStructure:
         separator = "-|-".join(["-" * len(h) for h in headers])
         # Create table rows
         rows = []
-        for entry in self.log[1:]:
+        for entry in copy_log[1:]:
             row = [
                 entry.get("timestamp", ""),
                 entry.get("status", "").upper(),
@@ -54,7 +56,8 @@ class SetupStructure:
         return log_entries if log_entries else "No log entries."
 
     def export(self):
-        Exporter.export(self.log, self.format, self.file)
+        log_copy = self._format_log()
+        Exporter.export(log_copy, self.format, self.file)
         self._hard_check_status()
 
     def _create_log(self):
@@ -77,8 +80,8 @@ class SetupStructure:
             raise ValueError("entry_type must be 'info', 'error', or 'warning'.")
         if failing_ids is not None:
             n_failing = len(failing_ids)
-            if len(failing_ids) > 10:
-                failing_ids = failing_ids[:10] + ["..."]
+            # if len(failing_ids) > 10:
+            #     failing_ids = failing_ids[:10] + ["..."]
         else:
             failing_ids = []
             n_failing = 0
@@ -94,6 +97,15 @@ class SetupStructure:
         }
 
         self.log.append(log_entry)
+
+    def _format_log(self):
+        # Optional method to format log entries for better readability
+        log_copy = copy.deepcopy(self.log)
+        for entry in log_copy[1:]:
+            if len(entry.get("failing_ids", [])) > 10:
+                entry["failing_ids"] = entry["failing_ids"][:10] + ["..."]
+
+        return log_copy
 
 
 class Validator(SetupStructure):
