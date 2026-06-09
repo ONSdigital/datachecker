@@ -130,9 +130,10 @@ def test_limiting_output_counts():
     validator._add_qa_entry(
         description="Test entry", failing_ids=list(range(1, 16)), outcome=False, entry_type="error"
     )
-    compressed_entry = validator.log[-1]
-    # Check that only a limited number of rows are shown in the output
-    assert "..." in str(compressed_entry)
+    # check ellipses present when validator object is printed
+    assert "10, ..." in str(validator)
+    # test the stored log does not contain ellipses
+    assert "..." not in validator.log[-1]
 
 
 def test_qa_type_error():

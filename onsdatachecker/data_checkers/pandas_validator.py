@@ -57,3 +57,12 @@ class DataValidator(Validator):
                 outcome=result,
                 entry_type="error",
             )
+
+    def failed_cases(self):
+        unique_failing_ids = super()._id_failed_cases()
+        if unique_failing_ids:
+            failed_cases = self.data.loc[unique_failing_ids]
+            return failed_cases
+        else:
+            print("No failed cases to export.")
+            return None

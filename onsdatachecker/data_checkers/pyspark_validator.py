@@ -126,3 +126,13 @@ class PySparkValidator(Validator):
                 outcome=result,
                 entry_type="error",
             )
+
+    def failed_cases(self):
+        warnings.warn(
+            "Exporting which data failed the validation checks is not currently "
+            "supported for PySpark dataframes. "
+            "This is because PySpark does not return row indices "
+            "or unique identifiers for failing cases. ",
+            UserWarning,
+            stacklevel=2,
+        )

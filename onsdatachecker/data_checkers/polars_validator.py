@@ -49,3 +49,16 @@ class PolarsValidator(Validator):
                 outcome=result,
                 entry_type="error",
             )
+
+    def failed_cases(self):
+        unique_ids = super()._id_failed_cases()
+        if unique_ids:
+            failed_cases = (
+                self.data.with_row_index("_row_nr")
+                .filter(self.data.with_row_index("_row_nr").get_column("_row_nr").is_in(unique_ids))
+                .drop("_row_nr")
+            )
+            return failed_cases
+        else:
+            print("No failed cases to export.")
+            return None
