@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Removed
+
+### Fixed
+
+## [2.1.0] - 2026-06-10
+
+### Added
+- method `failed_cases` which returns a dataframe containing all failed rows.
+- Pypi page now uses main readme
+
 ### Changed
 
 ### Removed 
