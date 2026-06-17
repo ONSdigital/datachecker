@@ -1,8 +1,7 @@
+import operator
 import re
 import warnings
 from functools import reduce
-import operator
-            
 
 from onsdatachecker.data_checkers.general_validator import Validator
 
@@ -98,18 +97,17 @@ class PySparkValidator(Validator):
 
             # Build the expected cartesian product of distinct (non-null) values per column
             result = (
-                        self.data
-                        .cube(*cols_to_check)
-                        .count()
-                        .na.drop(subset=cols_to_check)
-                        .agg(
-                            (
-                                reduce(operator.mul, [F.countDistinct(c) for c in cols_to_check]) 
-                                == F.count("*")
-                            ).alias("is_full")
-                        )
-                        .collect()[0]["is_full"]   # bring boolean to driver
-                    )
+                self.data.cube(*cols_to_check)
+                .count()
+                .na.drop(subset=cols_to_check)
+                .agg(
+                    (
+                        reduce(operator.mul, [F.countDistinct(c) for c in cols_to_check])
+                        == F.count("*")
+                    ).alias("is_full")
+                )
+                .collect()[0]["is_full"]  # bring boolean to driver
+            )
             if len(cols_to_check) > 4:
                 cols_to_check = cols_to_check[:4] + ["..."]
             formatted_cols_to_check = ", ".join(cols_to_check)
