@@ -1,5 +1,8 @@
 import re
 import warnings
+from functools import reduce
+import operator
+            
 
 from onsdatachecker.data_checkers.general_validator import Validator
 
@@ -94,28 +97,19 @@ class PySparkValidator(Validator):
             cols_to_check = self.schema.get("completeness_columns", self.data.columns)
 
             # Build the expected cartesian product of distinct (non-null) values per column
-            distinct_per_col = [
-                self.data.select(F.col(c)).where(F.col(c).isNotNull()).distinct()
-                for c in cols_to_check
-            ]
-
-            expected = distinct_per_col[0]
-            for df in distinct_per_col[1:]:
-                expected = expected.crossJoin(df)
-
-            # Build the set of existing (non-null) combinations
-            existing = (
-                self.data.select(*[F.col(c) for c in cols_to_check])
-                .where(F.concat_ws("||", *[F.col(c) for c in cols_to_check]).isNotNull())
-                .dropna()
-                .distinct()
-            )
-
-            # Missing combinations are expected minus existing
-            missing_combinations = expected.subtract(existing)
-
-            # True if no missing combinations exist
-            result = missing_combinations.limit(1).count() == 0
+            result = (
+                        self.data
+                        .cube(*cols_to_check)
+                        .count()
+                        .na.drop(subset=cols_to_check)
+                        .agg(
+                            (
+                                reduce(operator.mul, [F.countDistinct(c) for c in cols_to_check]) 
+                                == F.count("*")
+                            ).alias("is_full")
+                        )
+                        .collect()[0]["is_full"]   # bring boolean to driver
+                    )
             if len(cols_to_check) > 4:
                 cols_to_check = cols_to_check[:4] + ["..."]
             formatted_cols_to_check = ", ".join(cols_to_check)
