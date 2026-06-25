@@ -4,7 +4,7 @@
 ### Installing from Github
 It is not recommended to install specific requirements via Github, instead use the [PyPI install method](#Installing-from-PyPI) 
 ```Bash
-pip install git+https://github.com/ONSdigital/onsdatachecker.git
+pip install git+https://github.com/ONSdigital/datachecker.git
 ```
 ### Installing from PyPI
 
