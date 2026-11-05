@@ -1,9 +1,10 @@
-from time import time
+from time import perf_counter
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import polars as pl
 
-from onsdatachecker import DataValidator
+from onsdatachecker import DataValidator, PolarsValidator, PySparkValidator
 
 
 def create_long_schema(region_count, measure_count):
@@ -132,50 +133,76 @@ def create_wide_dataframe(rows_per_group, measure_count, region_count):
 
 
 def validate_and_time_dataframe(
-    rows_per_group, measure_count, region_count, n_iterations, wide_long
+    rows_per_group, measure_count, region_count, n_iterations, dataframe_library, dataframe_shape
 ):
-    if wide_long == "wide":
+    if dataframe_shape == "wide":
         df = create_wide_dataframe(rows_per_group, measure_count, region_count)
         schema = create_wide_schema(region_count, measure_count)
-    elif wide_long == "long":
+    elif dataframe_shape == "long":
         df = create_long_dataframe(rows_per_group, measure_count, region_count)
         schema = create_long_schema(region_count, measure_count)
     else:
-        raise ValueError("wide_long must be either 'wide' or 'long'")
-    start_time = time()
-    for _ in range(n_iterations):
-        DataValidator(schema=schema, data=df, file=None, format="yaml", hard_check=False)
-    end_time = time()
-    print(f"Dataframe Shape {df.shape}")
-    print(f"Average execution time ({wide_long}): {(end_time - start_time) / n_iterations} seconds")
+        raise ValueError("dataframe_shape must be either 'wide' or 'long'")
 
-    return (end_time - start_time) / n_iterations
+    validator_class = DataValidator
+    if dataframe_library == "polars":
+        df = pl.from_pandas(df)
+        validator_class = PolarsValidator
+    elif dataframe_library == "pyspark":
+        from pyspark.sql import SparkSession
+
+        spark = SparkSession.builder.getOrCreate()
+        df = spark.createDataFrame(df)
+        validator_class = PySparkValidator
+    elif dataframe_library != "pandas" and dataframe_library != "pyspark":
+        raise ValueError("dataframe_library must be either 'pandas', 'polars', or 'pyspark'")
+
+    start_time = perf_counter()
+    for _ in range(n_iterations):
+        validator_class(
+            schema=schema, data=df, file=None, format="yaml", hard_check=False
+        ).validate()
+    elapsed = (perf_counter() - start_time) / n_iterations
+    print(f"Dataframe shape ({dataframe_library}, {dataframe_shape}): {df.shape}")
+    print(f"Average validation time: {elapsed:.6f} seconds")
+
+    return elapsed
 
 
 def run_test():
-    REGION_COUNT = 1000
+    REGION_COUNT = 100
     MEASURE_COUNT = 20
     ROWS_PER_GROUP_SIZES = [10, 50, 100, 250, 500, 750, 1000]
-    n_iterations = int(1e5)
+    n_iterations = int(100)
 
-    runtime = {"wide": [], "long": []}
+    cases = [
+        ("pandas", "wide"),
+        ("pandas", "long"),
+        ("polars", "wide"),
+        ("polars", "long"),
+    ]  # ("pyspark", "wide"), ("pyspark", "long")]
+    runtime = {f"{library} {shape}": [] for library, shape in cases}
 
     for rows_per_group in ROWS_PER_GROUP_SIZES:
-        for case in ["wide", "long"]:
+        for dataframe_library, dataframe_shape in cases:
             elapsed = validate_and_time_dataframe(
-                rows_per_group, MEASURE_COUNT, REGION_COUNT, n_iterations, case
+                rows_per_group,
+                MEASURE_COUNT,
+                REGION_COUNT,
+                n_iterations,
+                dataframe_library,
+                dataframe_shape,
             )
-            runtime[case].append(elapsed)
+            runtime[f"{dataframe_library} {dataframe_shape}"].append(elapsed)
 
     print(runtime)
+    pd.DataFrame(runtime).to_csv("validation_runtime.csv")
 
     plt.figure(figsize=(10, 6))
-    for case in ["wide", "long"]:
-        plt.plot(
-            ROWS_PER_GROUP_SIZES, [float(x) * 1000 for x in runtime[case]], marker="o", label=case
-        )
+    for case, values in runtime.items():
+        plt.plot(ROWS_PER_GROUP_SIZES, values, marker="o", label=case)
     plt.xlabel("Rows per group")
-    plt.ylabel(f"Average execution time over {n_iterations} iterations (milliseconds)")
+    plt.ylabel(f"Average execution time over {n_iterations} iterations (seconds)")
     plt.title("Validation runtime by data shape and input size")
     plt.legend()
     plt.grid(True, alpha=0.3)
