@@ -1,5 +1,6 @@
 from time import time
 
+import matplotlib.pyplot as plt
 import pandas as pd
 
 from onsdatachecker import DataValidator
@@ -145,25 +146,42 @@ def validate_and_time_dataframe(
     for _ in range(n_iterations):
         DataValidator(schema=schema, data=df, file=None, format="yaml", hard_check=False)
     end_time = time()
-    print(f"Execution time ({wide_long}): {end_time - start_time} seconds")
+    print(f"Dataframe Shape {df.shape}")
     print(f"Average execution time ({wide_long}): {(end_time - start_time) / n_iterations} seconds")
-    return end_time - start_time
+
+    return (end_time - start_time) / n_iterations
 
 
 def run_test():
     REGION_COUNT = 1000
-    MEASURE_COUNT = 100
-    ROWS_PER_GROUP = 100
-    n_iterations = int(1e4)
-    runtime = {}
-    for case in ["wide"]:
-        runtime[case] = validate_and_time_dataframe(
-            ROWS_PER_GROUP, MEASURE_COUNT, REGION_COUNT, n_iterations, case
-        )
+    MEASURE_COUNT = 20
+    ROWS_PER_GROUP_SIZES = [10, 50, 100, 250, 500, 750, 1000]
+    n_iterations = int(1e5)
+
+    runtime = {"wide": [], "long": []}
+
+    for rows_per_group in ROWS_PER_GROUP_SIZES:
+        for case in ["wide", "long"]:
+            elapsed = validate_and_time_dataframe(
+                rows_per_group, MEASURE_COUNT, REGION_COUNT, n_iterations, case
+            )
+            runtime[case].append(elapsed)
+
     print(runtime)
+
+    plt.figure(figsize=(10, 6))
+    for case in ["wide", "long"]:
+        plt.plot(
+            ROWS_PER_GROUP_SIZES, [float(x) * 1000 for x in runtime[case]], marker="o", label=case
+        )
+    plt.xlabel("Rows per group")
+    plt.ylabel(f"Average execution time over {n_iterations} iterations (milliseconds)")
+    plt.title("Validation runtime by data shape and input size")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig("validation_runtime.png")
 
 
 if __name__ == "__main__":
-    import cProfile
-
-    cProfile.run("run_test()")
+    run_test()
