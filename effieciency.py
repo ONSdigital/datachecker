@@ -3,6 +3,7 @@ from time import perf_counter
 import matplotlib.pyplot as plt
 import pandas as pd
 import polars as pl
+import seaborn as sns
 
 from onsdatachecker import DataValidator, PolarsValidator, PySparkValidator
 
@@ -173,7 +174,7 @@ def run_test():
     REGION_COUNT = 100
     MEASURE_COUNT = 20
     ROWS_PER_GROUP_SIZES = [10, 50, 100, 250, 500, 750, 1000]
-    n_iterations = int(100)
+    n_iterations = int(1000)
 
     cases = [
         ("pandas", "wide"),
@@ -195,15 +196,24 @@ def run_test():
             )
             runtime[f"{dataframe_library} {dataframe_shape}"].append(elapsed)
 
-    print(runtime)
-    pd.DataFrame(runtime).to_csv("validation_runtime.csv")
-
     plt.figure(figsize=(10, 6))
-    for case, values in runtime.items():
-        plt.plot(ROWS_PER_GROUP_SIZES, values, marker="o", label=case)
+    runtime_df = pd.DataFrame(runtime)
+    runtime_df.to_csv("validation_runtime.csv")
+    runtime_df["rows_per_group"] = ROWS_PER_GROUP_SIZES
+    runtime_long = runtime_df.melt(id_vars="rows_per_group", var_name="case", value_name="elapsed")
+    sns.barplot(data=runtime_long, x="rows_per_group", y="elapsed", hue="case")
     plt.xlabel("Rows per group")
     plt.ylabel(f"Average execution time over {n_iterations} iterations (seconds)")
     plt.title("Validation runtime by data shape and input size")
+    plt.gca().text(
+        0.02,
+        0.98,
+        f"Region count: {REGION_COUNT}\nMeasure count: {MEASURE_COUNT}\n Sex count: 2 \n Long format shape: ({REGION_COUNT * MEASURE_COUNT * 2}* rows_per_group, 5)\n Wide format shape: ({REGION_COUNT * 2} * rows_per_group, {MEASURE_COUNT + 3})",  # noqa: E501
+        transform=plt.gca().transAxes,
+        verticalalignment="top",
+        bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
+    )
+
     plt.legend()
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
@@ -211,4 +221,7 @@ def run_test():
 
 
 if __name__ == "__main__":
+    t0 = perf_counter()
     run_test()
+    t1 = perf_counter()
+    print(f"Total execution time: {t1 - t0:.6f} seconds")

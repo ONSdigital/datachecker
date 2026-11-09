@@ -41,7 +41,7 @@ def check_and_export(schema, data, file, format, hard_check=True, custom_checks=
             custom_checks=custom_checks,
         )
 
-    if (mod, name) == ("pandas.core.frame", "DataFrame"):
+    if (mod, name) == ("pandas", "DataFrame"):
         validator = DataValidator(
             schema=schema,
             data=data,
