@@ -12,7 +12,7 @@ def create_long_schema(region_count, measure_count):
     regions, sexes, measures = create_regions_sexes_measures(region_count, measure_count)
 
     long_schema = {
-        "check_duplicates": False,
+        "check_duplicates": True,
         "check_completeness": False,
         "columns": {
             "id": {
@@ -78,7 +78,7 @@ def create_wide_schema(region_count, measure_count):
     regions, sexes, measures = create_regions_sexes_measures(region_count, measure_count)
 
     wide_schema = {
-        "check_duplicates": False,
+        "check_duplicates": True,
         "check_completeness": False,
         "columns": {
             "id": {
@@ -170,26 +170,20 @@ def validate_and_time_dataframe(
     return elapsed
 
 
-def run_test():
-    REGION_COUNT = 100
-    MEASURE_COUNT = 20
-    ROWS_PER_GROUP_SIZES = [10, 50, 100, 250, 500, 750, 1000]
-    n_iterations = int(1000)
+def run_test(config):
+    region_count = config.get("region_count")
+    measure_count = config.get("measure_count")
+    rows_per_group_sizes = config.get("rows_per_group_sizes")
+    n_iterations = int(config.get("n_iterations"))
 
-    cases = [
-        ("pandas", "wide"),
-        ("pandas", "long"),
-        ("polars", "wide"),
-        ("polars", "long"),
-    ]  # ("pyspark", "wide"), ("pyspark", "long")]
-    runtime = {f"{library} {shape}": [] for library, shape in cases}
+    runtime = {f"{library} {shape}": [] for library, shape in config.get("test_cases")}
 
-    for rows_per_group in ROWS_PER_GROUP_SIZES:
-        for dataframe_library, dataframe_shape in cases:
+    for rows_per_group in rows_per_group_sizes:
+        for dataframe_library, dataframe_shape in config.get("test_cases"):
             elapsed = validate_and_time_dataframe(
                 rows_per_group,
-                MEASURE_COUNT,
-                REGION_COUNT,
+                measure_count,
+                region_count,
                 n_iterations,
                 dataframe_library,
                 dataframe_shape,
@@ -199,7 +193,7 @@ def run_test():
     plt.figure(figsize=(10, 6))
     runtime_df = pd.DataFrame(runtime)
     runtime_df.to_csv("validation_runtime.csv")
-    runtime_df["rows_per_group"] = ROWS_PER_GROUP_SIZES
+    runtime_df["rows_per_group"] = rows_per_group_sizes
     runtime_long = runtime_df.melt(id_vars="rows_per_group", var_name="case", value_name="elapsed")
     sns.barplot(data=runtime_long, x="rows_per_group", y="elapsed", hue="case")
     plt.xlabel("Rows per group")
@@ -208,7 +202,7 @@ def run_test():
     plt.gca().text(
         0.02,
         0.98,
-        f"Region count: {REGION_COUNT}\nMeasure count: {MEASURE_COUNT}\n Sex count: 2 \n Long format shape: ({REGION_COUNT * MEASURE_COUNT * 2}* rows_per_group, 5)\n Wide format shape: ({REGION_COUNT * 2} * rows_per_group, {MEASURE_COUNT + 3})",  # noqa: E501
+        f"Region count: {region_count}\nMeasure count: {measure_count}\n Sex count: 2 \n Long format shape: ({region_count * measure_count * 2}* rows_per_group, 5)\n Wide format shape: ({region_count * 2} * rows_per_group, {measure_count + 3})",  # noqa: E501
         transform=plt.gca().transAxes,
         verticalalignment="top",
         bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
@@ -222,6 +216,18 @@ def run_test():
 
 if __name__ == "__main__":
     t0 = perf_counter()
-    run_test()
+    test_config = {
+        "region_count": 100,
+        "measure_count": 20,
+        "rows_per_group_sizes": [10, 50, 100, 250, 500, 750, 1000],
+        "n_iterations": int(10),
+        "test_cases": [
+            ("pandas", "wide"),
+            ("pandas", "long"),
+            ("polars", "wide"),
+            ("polars", "long"),
+        ],
+    }
+    run_test(test_config)
     t1 = perf_counter()
     print(f"Total execution time: {t1 - t0:.6f} seconds")
