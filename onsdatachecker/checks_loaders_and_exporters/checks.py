@@ -12,17 +12,17 @@ def _type_id(obj) -> tuple[str, str]:
 def get_dtype_lib(df):
     mod, name = _type_id(df)
 
-    if (mod, name) == ("pandas.core.frame", "DataFrame"):
+    if (mod, name) == ("pandas", "DataFrame") or (mod, name) == ("pandas.core.frame", "DataFrame"):
         import pandera.pandas as pa
 
         return pa
 
-    if (mod, name) == ("polars.dataframe.frame", "DataFrame"):
+    elif (mod, name) == ("polars.dataframe.frame", "DataFrame"):
         import pandera.polars as pap
 
         return pap
 
-    if (mod, name) == ("pyspark.sql.dataframe", "DataFrame") or (mod, name) == (
+    elif (mod, name) == ("pyspark.sql.dataframe", "DataFrame") or (mod, name) == (
         "pyspark.sql.classic.dataframe",
         "DataFrame",
     ):
@@ -300,12 +300,12 @@ def convert_schema(schema: dict, df, custom_checks: dict = None) -> pa.DataFrame
         if "max_length" in constraints:
             checks.append(string_length(max_length=constraints["max_length"], library=library))
         if "allowed_values" in constraints:
-            warnings.warn(
-                "Regex patterns are not supported for allowed_values in pyspark, "
-                "please use a list of allowed values instead.",
-                UserWarning,
-                stacklevel=2,
-            )
+            # warnings.warn(
+            #     "Regex patterns are not supported for allowed_values in pyspark, "
+            #     "please use a list of allowed values instead.",
+            #     UserWarning,
+            #     stacklevel=2,
+            # )
             checks.append(allowed_values(constraints["allowed_values"], library=library))
         if "forbidden_values" in constraints:
             checks.append(forbidden_values(constraints["forbidden_values"], library=library))

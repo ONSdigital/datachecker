@@ -41,7 +41,7 @@ def check_and_export(schema, data, file, format, hard_check=True, custom_checks=
             custom_checks=custom_checks,
         )
 
-    if (mod, name) == ("pandas.core.frame", "DataFrame"):
+    elif (mod, name) == ("pandas", "DataFrame") or (mod, name) == ("pandas.core.frame", "DataFrame"):
         validator = DataValidator(
             schema=schema,
             data=data,
@@ -51,7 +51,7 @@ def check_and_export(schema, data, file, format, hard_check=True, custom_checks=
             custom_checks=custom_checks,
         )
 
-    if (mod, name) == ("pyspark.sql.dataframe", "DataFrame") or (mod, name) == (
+    elif (mod, name) == ("pyspark.sql.dataframe", "DataFrame") or (mod, name) == (
         "pyspark.sql.classic.dataframe",
         "DataFrame",
     ):
@@ -63,6 +63,9 @@ def check_and_export(schema, data, file, format, hard_check=True, custom_checks=
             hard_check=hard_check,
             custom_checks=custom_checks,
         )
+
+    else:
+        raise ValueError(f"Unsupported data type: ({mod}, {name})")
 
     validator.validate()
     validator.export()
