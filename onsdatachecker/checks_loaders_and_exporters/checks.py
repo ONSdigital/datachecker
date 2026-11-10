@@ -12,17 +12,17 @@ def _type_id(obj) -> tuple[str, str]:
 def get_dtype_lib(df):
     mod, name = _type_id(df)
 
-    if (mod, name) == ("pandas", "DataFrame"):
+    if (mod, name) == ("pandas", "DataFrame") or (mod, name) == ("pandas.core.frame", "DataFrame"):
         import pandera.pandas as pa
 
         return pa
 
-    if (mod, name) == ("polars.dataframe.frame", "DataFrame"):
+    elif (mod, name) == ("polars.dataframe.frame", "DataFrame"):
         import pandera.polars as pap
 
         return pap
 
-    if (mod, name) == ("pyspark.sql.dataframe", "DataFrame") or (mod, name) == (
+    elif (mod, name) == ("pyspark.sql.dataframe", "DataFrame") or (mod, name) == (
         "pyspark.sql.classic.dataframe",
         "DataFrame",
     ):
