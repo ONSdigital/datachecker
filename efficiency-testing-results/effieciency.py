@@ -192,7 +192,7 @@ def run_test(config):
 
     plt.figure(figsize=(10, 6))
     runtime_df = pd.DataFrame(runtime)
-    runtime_df.to_csv("validation_runtime.csv")
+    runtime_df.to_csv("efficiency-testing-results/validation_runtime.csv")
     runtime_df["rows_per_group"] = rows_per_group_sizes
     runtime_long = runtime_df.melt(id_vars="rows_per_group", var_name="case", value_name="elapsed")
     sns.barplot(data=runtime_long, x="rows_per_group", y="elapsed", hue="case")
@@ -211,7 +211,7 @@ def run_test(config):
     plt.legend()
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig("validation_runtime.png")
+    plt.savefig("efficiency-testing-results/validation_runtime.png")
 
 
 if __name__ == "__main__":
@@ -231,3 +231,10 @@ if __name__ == "__main__":
     run_test(test_config)
     t1 = perf_counter()
     print(f"Total execution time: {t1 - t0:.6f} seconds")
+
+
+# todo:
+# Check dataframes contain the same amount of intformation
+# Test significantly wider df -> 4000 rows but 500 columns
+# Standard deviation of execution times for each test case
+# Compare performance between long and wide formats for each library
